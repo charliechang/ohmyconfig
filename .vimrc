@@ -1,6 +1,6 @@
 " #### Actions ####
 " brew install ack
-" ln -sf .vimrc ~/
+" ln -sf $(pwd)/.vimrc ~/
 " vim +PluginInstall +qall
 " stty -ixon >> ~/.zshrc
 
