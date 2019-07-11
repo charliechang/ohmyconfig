@@ -97,5 +97,6 @@ command -nargs=0 -bar Update if &modified
 nnoremap <silent> <C-S> :<C-u>Update<CR>
 
 set wildignore+=*/tmp/*,*.so,*.swp,*.zip
-set wildignore+=*/site-packages/*,*.pyc,*.class
+set wildignore+=*/site-packages/*,*.pyc,*.class,*.o
 set wildignore+=*/target/*
+let NERDTreeIgnore = ['\.o$','\.pyc$','\.class$']
