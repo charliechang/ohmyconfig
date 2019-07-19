@@ -78,6 +78,9 @@ nnoremap b7 :b7<CR>
 nnoremap b8 :b8<CR>
 nnoremap b9 :b9<CR>
 
+nnoremap <leader>b  :YcmCompleter GoTo<CR>
+let g:ycm_global_ycm_extra_conf = '~/.config/nvim/plugged/YouCompleteMe/third_party/ycmd/.ycm_extra_conf.py'
+
 set switchbuf=useopen
 set autoread
 
