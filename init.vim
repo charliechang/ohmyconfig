@@ -1,6 +1,5 @@
 " #### Actions ####
-" brew install ack
-" brew install neovim
+" brew install ack neovim
 " mkdir -p ~/.config/nvim
 " ln -sf $(pwd)/init.vim ~/.config/nvim/
 " stty -ixon >> ~/.zshrc
@@ -25,7 +24,7 @@ call plug#begin()
     Plug 'bling/vim-bufferline'
     Plug 'mileszs/ack.vim'
     Plug 'christoomey/vim-tmux-navigator'
-    Plug 'neoclide/coc.nvim', {'branch': 'release'}
+    Plug 'Valloric/YouCompleteMe', { 'do': './install.py' }
 call plug#end()
 filetype plugin indent on    " required
 
