@@ -1,29 +1,33 @@
 " #### Actions ####
 " brew install ack
-" ln -sf $(pwd)/.vimrc ~/
-" vim +PluginInstall +qall
+" brew install neovim
+" mkdir -p ~/.config/nvim
+" ln -sf $(pwd)/init.vim ~/.config/nvim/
 " stty -ixon >> ~/.zshrc
+" echo "alias vim='nvim'" >> ~/.zshrc
+" python3 -m pip install --user --upgrade pynvim
+" python2 -m pip install --user --upgrade pynvim
+" curl -fLo ~/.local/share/nvim/site/autoload/plug.vim --create-dirs \
+"    https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+" nvim +PlugInstall
 
 
 set nocompatible              " be iMproved, required
 
 filetype plugin indent on
 " filetype off                  " required
-" set the runtime path to include Vundle and initialize
-set rtp+=~/.vim/bundle/Vundle.vim
-call vundle#begin()
-    Plugin 'VundleVim/Vundle.vim'
-    Plugin 'scrooloose/nerdtree'
-    Plugin 'ctrlpvim/ctrlp.vim'
-    Plugin 'Raimondi/delimitMate'
-    Plugin 'Yggdroot/indentLine'
-    Plugin 'vim-airline/vim-airline'
-    Plugin 'bling/vim-bufferline'
-    Plugin 'Valloric/YouCompleteMe'
-    Plugin 'mileszs/ack.vim'
-    Plugin 'christoomey/vim-tmux-navigator'
-    call vundle#end()            " required
-    filetype plugin indent on    " required
+call plug#begin()
+    Plug 'scrooloose/nerdtree'
+    Plug 'ctrlpvim/ctrlp.vim'
+    Plug 'Raimondi/delimitMate'
+    Plug 'Yggdroot/indentLine'
+    Plug 'vim-airline/vim-airline'
+    Plug 'bling/vim-bufferline'
+    Plug 'mileszs/ack.vim'
+    Plug 'christoomey/vim-tmux-navigator'
+    Plug 'neoclide/coc.nvim', {'branch': 'release'}
+call plug#end()
+filetype plugin indent on    " required
 
 set clipboard=unnamed
 set backspace=indent,eol,start
@@ -65,10 +69,6 @@ set laststatus=2
 " " show buffer number
  let g:airline#extensions#tabline#buffer_nr_show = 1
 set hidden
-nnoremap bn :bn<CR>
-nnoremap bp :bp<CR>
-nnoremap bd :bd<CR>
-nnoremap bp :bp<CR>
 nnoremap b1 :b1<CR>
 nnoremap b2 :b2<CR>
 nnoremap b3 :b3<CR>
@@ -78,10 +78,6 @@ nnoremap b6 :b6<CR>
 nnoremap b7 :b7<CR>
 nnoremap b8 :b8<CR>
 nnoremap b9 :b9<CR>
-nnoremap ls :ls<CR>
-
-nnoremap <leader>b  :YcmCompleter GoTo<CR>
-let g:ycm_global_ycm_extra_conf = '~/.vim/bundle/YouCompleteMe/third_party/ycmd/.ycm_extra_conf.py'
 
 set switchbuf=useopen
 set autoread
