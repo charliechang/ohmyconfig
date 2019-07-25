@@ -24,7 +24,7 @@ call plug#begin()
     Plug 'bling/vim-bufferline'
     Plug 'mileszs/ack.vim'
     Plug 'christoomey/vim-tmux-navigator'
-    Plug 'Valloric/YouCompleteMe', { 'do': './install.py' }
+    Plug 'Valloric/YouCompleteMe', { 'do': './install.py --clang-completer' }
 call plug#end()
 filetype plugin indent on    " required
 
