@@ -4,6 +4,7 @@
 " ln -sf $(pwd)/init.vim ~/.config/nvim/
 " stty -ixon >> ~/.zshrc
 " echo "alias vim='nvim'" >> ~/.zshrc
+" echo "export LC_ALL='C'" >> ~/.zshrc
 " python3 -m pip install --user --upgrade pynvim
 " python2 -m pip install --user --upgrade pynvim
 " curl -fLo ~/.local/share/nvim/site/autoload/plug.vim --create-dirs \
