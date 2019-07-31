@@ -102,5 +102,5 @@ set wildignore+=*/target/*
 let NERDTreeIgnore = ['\.o$','\.pyc$','\.class$']
 cnoreabbrev Ack Ack!
 cnoreabbrev Q! q!
-cnoreabbrev Qw! qw!
-cnoreabbrev QW! qw!
+cnoreabbrev Wq wq
+cnoreabbrev WQ wq
