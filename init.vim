@@ -9,7 +9,19 @@
 " python2 -m pip install --user --upgrade pynvim
 " curl -fLo ~/.local/share/nvim/site/autoload/plug.vim --create-dirs \
 "    https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+" xcode-select --install # May need this line for new Mac OS before running
+" # plugin YouCompleteMe
 " nvim +PlugInstall
+" :CocConfig
+"{
+"    "java.jdt.ls.vmargs": "-javaagent:/Users/cchang/Work/lombok.jar -Xbootclasspath/a:/Users/cchang/Work/lombok.jar",
+"    "java.format.enabled": true,
+"    "java.import.maven.enabled": true,
+"    "java.autobuild.enabled": true,
+"    "java.signatureHelp.enabled": true,
+"    "java.completion.enabled": true
+"}
+" :CocInstall coc-java
 
 
 set nocompatible              " be iMproved, required
@@ -25,7 +37,8 @@ call plug#begin()
     Plug 'bling/vim-bufferline'
     Plug 'mileszs/ack.vim'
     Plug 'christoomey/vim-tmux-navigator'
-    Plug 'Valloric/YouCompleteMe', { 'do': './install.py --clang-completer' }
+    Plug 'Valloric/YouCompleteMe', { 'do': './install.py' }
+    Plug 'neoclide/coc.nvim', {'branch': 'release'}
 call plug#end()
 filetype plugin indent on    " required
 
@@ -79,7 +92,13 @@ nnoremap b7 :b7<CR>
 nnoremap b8 :b8<CR>
 nnoremap b9 :b9<CR>
 
+nmap <silent> gd <Plug>(coc-definition)
+nmap <silent> gy <Plug>(coc-type-definition)
+nmap <silent> gi <Plug>(coc-implementation)
+nmap <silent> gr <Plug>(coc-references)
+
 nnoremap <leader>b  :YcmCompleter GoTo<CR>
+let g:ycm_filetype_whitelist={'python':1}
 let g:ycm_global_ycm_extra_conf = '~/.config/nvim/plugged/YouCompleteMe/third_party/ycmd/.ycm_extra_conf.py'
 
 set switchbuf=useopen
@@ -104,3 +123,5 @@ cnoreabbrev Ack Ack!
 cnoreabbrev Q! q!
 cnoreabbrev Wq wq
 cnoreabbrev WQ wq
+set splitbelow
+set splitright
