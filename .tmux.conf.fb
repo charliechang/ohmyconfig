@@ -13,15 +13,11 @@ setw -g mode-keys vi
 set-option -g allow-rename off
 set-option -g default-terminal "screen-256color"
 
-# Have to use iTerm2 to support copy and paste
-set -sa terminal-overrides "Ms==\\E]52;%p1%s;%p2%s\\007"
-set -s set-clipboard on
-# bind -n C-s run-shell "tmux show-buffer | pbcopy"
-## ind -T prefix ] run-shell "tmux set-buffer \"$(pbpaste)\"; tmux paste-buffer"
+bind -T prefix ] run-shell "tmux set-buffer \"$(pbpaste)\"; tmux paste-buffer"
 unbind -T copy-mode-vi Enter
-bind -T copy-mode-vi y send-keys -X copy-selection-and-cancel #\; run-shell "tmux show-buffer | pbcopy"
-## nbind -T copy-mode-vi v
-## ind -T copy-mode-vi v send-keys -X begin-selection
+bind -T copy-mode-vi y send-keys -X copy-selection-and-cancel \; run-shell "tmux show-buffer | pbcopy"
+unbind -T copy-mode-vi v
+bind -T copy-mode-vi v send-keys -X begin-selection
 set -sg escape-time 0
 
 bind -T prefix | split-window -h
