@@ -1,0 +1,37 @@
+set -g default-command "${SHELL}"
+set -g history-limit 500000
+set -g status-right "#{s/.facebook.com//:host} • %Y-%m-%d %H:%M"
+set -s default-terminal "tmux-256color"
+set -s escape-time 0
+
+# #### Actions ####
+# brew install reattach-to-user-namespace
+# ln -sf $(pwd)/.tmux.conf ~/
+
+setw -g mode-keys vi
+# set-option -g default-command "reattach-to-user-namespace -l /bin/zsh"
+set-option -g allow-rename off
+set-option -g default-terminal "screen-256color"
+
+# Have to use iTerm2 to support copy and paste
+set -sa terminal-overrides "Ms==\\E]52;%p1%s;%p2%s\\007"
+set -s set-clipboard on
+# bind -n C-s run-shell "tmux show-buffer | pbcopy"
+## ind -T prefix ] run-shell "tmux set-buffer \"$(pbpaste)\"; tmux paste-buffer"
+unbind -T copy-mode-vi Enter
+bind -T copy-mode-vi y send-keys -X copy-selection-and-cancel #\; run-shell "tmux show-buffer | pbcopy"
+## nbind -T copy-mode-vi v
+## ind -T copy-mode-vi v send-keys -X begin-selection
+set -sg escape-time 0
+
+bind -T prefix | split-window -h
+bind -T prefix - split-window -v
+
+#set -g pane-border-style fg=magenta
+#set -g pane-active-border-style fg=magenta
+#set -g pane-active-border-style bg=default
+
+#set -g window-style 'fg=colour46,bg=colour235'
+set -g window-style 'fg=black,bg=#abccaf'
+#set -g window-active-style 'fg=colour46,bg=black'
+set -g window-active-style 'fg=black,bg=#c7edcc'
