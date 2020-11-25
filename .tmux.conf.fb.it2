@@ -20,8 +20,8 @@ set -s set-clipboard on
 ## ind -T prefix ] run-shell "tmux set-buffer \"$(pbpaste)\"; tmux paste-buffer"
 unbind -T copy-mode-vi Enter
 bind -T copy-mode-vi y send-keys -X copy-selection-and-cancel #\; run-shell "tmux show-buffer | pbcopy"
-## nbind -T copy-mode-vi v
-## ind -T copy-mode-vi v send-keys -X begin-selection
+unbind -T copy-mode-vi v
+bind -T copy-mode-vi v send-keys -X begin-selection
 set -sg escape-time 0
 
 bind -T prefix | split-window -h
