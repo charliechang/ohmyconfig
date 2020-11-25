@@ -1,0 +1,205 @@
+set backspace=indent,eol,start
+set rnu
+set nu
+syntax on
+set tabstop=4
+set shiftwidth=4
+set softtabstop=4
+set expandtab
+set wildmenu
+set wildmode=list:longest,full
+
+set cursorline
+highlight  CursorLine ctermbg=None ctermfg=None
+autocmd InsertEnter * highlight  CursorLine ctermbg=DarkBlue ctermfg=LightGreen
+autocmd InsertLeave * highlight  CursorLine ctermbg=None ctermfg=None
+
+set t_Co=256
+set hlsearch
+set incsearch
+set autoindent
+set ic
+set foldmethod=indent
+set foldlevel=1
+
+" autocmd VimEnter * NERDTree
+nnoremap <C-n> :NERDTreeToggle<CR>
+nnoremap cdc :cd %:p:h<CR>:pwd<CR>
+noremap gs :vimgrep /<C-r><C-w>/gj ./**<CR>
+set laststatus=2
+" enable tabline
+ let g:airline#extensions#tabline#enabled = 1
+" " set left separator
+ let g:airline#extensions#tabline#left_sep = ' '
+" " set left separator which are not editting
+ let g:airline#extensions#tabline#left_alt_sep = '|'
+" " show buffer number
+ let g:airline#extensions#tabline#buffer_nr_show = 1
+set hidden
+nnoremap bn :bn<CR>
+nnoremap bp :bp<CR>
+nnoremap bd :bd<CR>
+nnoremap bp :bp<CR>
+nnoremap b1 :b1<CR>
+nnoremap b2 :b2<CR>
+nnoremap b3 :b3<CR>
+nnoremap b4 :b4<CR>
+nnoremap b5 :b5<CR>
+nnoremap b6 :b6<CR>
+nnoremap b7 :b7<CR>
+nnoremap b8 :b8<CR>
+nnoremap b9 :b9<CR>
+nnoremap ls :ls<CR>
+
+set switchbuf=useopen
+set autoread
+
+" ##### pbcopy #####
+
+let g:vim_pbcopy_local_cmd = "nc -w1 localhost 8377"
+
+vnoremap <silent> y :<C-U>call <SID>copyVisualSelection(visualmode(), 1)<CR>
+nnoremap <silent> y :set opfunc=<SID>copyVisualSelection<CR>g@
+
+function! s:getVisualSelection()
+    let [lnum1, col1] = getpos("'<")[1:2]
+    let [lnum2, col2] = getpos("'>")[1:2]
+    let lines = getline(lnum1, lnum2)
+    let lines[-1] = lines[-1][:col2 - (&selection == 'inclusive' ? 1 : 2)]
+    let lines[0] = lines[0][col1 - 1:]
+    return lines
+endfunction
+
+function! s:isRunningLocally()
+"   if len($SSH_CLIENT)
+"       return 0
+"   else
+        return 1
+"    endif
+endfunction
+
+function! s:getTransformedLine(line)
+    let transforms = {}
+    if exists("g:vim_pbcopy_regex_transforms")
+        let transforms = g:vim_pbcopy_regex_transforms
+    endif
+
+    for key in keys(transforms)
+        echom "[getTransformedLine] line: <" . a:line . ">"
+        echom "[getTransformedLine] match expression: " . key . ", regex transform: " . transforms[key]
+        if a:line =~ key
+            let a = substitute(a:line, key, transforms[key], "")
+            echom "[getTransformedLine] tranformed line: " . a
+        endif
+    endfor
+
+    return a:line
+endfunction
+
+function! s:getTransformedLines(listOfLines)
+    let transforms = {}
+    if exists("g:vim_pbcopy_regex_transforms")
+        let transforms = g:vim_pbcopy_regex_transforms
+    endif
+
+    for key in keys(transforms)
+        " echom "match expression: " . key . ", regex transform: " . transforms[key]
+    endfor
+    return a:listOfLines
+endfunction
+
+function! s:getShellEscapedLines(listOfLines)
+    " Join the lines with the literal characters '\n' (two chars) so that
+    " they will be echo-ed correctly. Passing a non-zero second argument to
+    " shellescape means it will escape "!" and other characters special to
+    " Vim. See :help shellescape. We need this because otherwise execute"
+    " will replace "!" with the previously-executed command and chaos will
+    " ensue.
+
+    " Original content
+    " Note there is very weird behavior when attempting to copy a line which
+    " contains the literal character \n. Example:
+    "
+    "   console.log('hello\nthere');
+    "
+
+    if exists("g:vim_pbcopy_escape_backslashes") && g:vim_pbcopy_escape_backslashes
+        " Global override is set and is truthy
+        echom "[vim-pbcopy debug] forcing shellescape(escape(...))"
+        return shellescape(escape(join(a:listOfLines, "\n"), '\'), 1)
+    elseif exists("g:vim_pbcopy_escape_backslashes")
+        " Global override is set and is falsey
+        echom "[vim-pbcopy debug] forcing shellescape(...)"
+        return shellescape(join(a:listOfLines, "\n"), 1)
+    endif
+
+    if s:isRunningLocally()
+        " echom "[vim-pbcopy debug] shellescape(escape(...))"
+        " return shellescape(escape(join(a:listOfLines, "\n"), '\'), 1)
+
+        " Confirmed working on Mac OS X Yosemite
+        echom "[vim-pbcopy debug] shellescape(...)"
+        return shellescape(join(a:listOfLines, "\n"), 1)
+    else
+        " So far works on all Linux distros I've used. Assuming that when
+        " Vim is not running locally it's because you're SSH-ing into a
+        " Linux host.
+        echom "[vim-pbcopy debug] shellescape(escape(...))"
+        return shellescape(escape(join(a:listOfLines, "\n"), '\'), 1)
+    endif
+endfunction
+
+function! s:sendTextToPbCopy(escapedText)
+    try
+        if s:isRunningLocally()
+            " Call the UNIX echo command. The -n means do not output trailing newline.
+            execute "silent !echo -n " . a:escapedText . " | " . g:vim_pbcopy_local_cmd
+        else
+            " Call the UNIX echo command. The -n means do not output trailing newline.
+            execute "silent !echo -n " . a:escapedText . " | " . g:vim_pbcopy_remote_cmd
+        endif
+        redraw! " Fix up the screen
+        return 0
+    catch /E121/
+        " Undefined variable error
+        echohl WarningMsg
+        echom "Please set g:vim_pbcopy_remote_cmd in your ~/.vimrc with something like: 'let g:vim_pbcopy_remote_cmd = \"ssh hostname.example.com pbcopy\"'"
+        echohl None
+        return 1
+    endtry
+endfunction
+
+function! s:copyVisualSelection(type, ...)
+    let sel_save = &selection
+    let &selection = "inclusive"
+    let reg_save = @@
+
+    if a:0  " Invoked from Visual mode, use '< and '> marks.
+      silent exe "normal! `<" . a:type . "`>y"
+    elseif a:type == 'line'
+      silent exe "normal! '[V']y"
+    elseif a:type == 'block'
+      silent exe "normal! `[\<C-V>`]y"
+    else
+      silent exe "normal! `[v`]y"
+    endif
+
+    let lines = split(@@, "\n")
+
+    " -- " Transform individual lines
+    " -- let i = 0
+    " -- while i < len(lines)
+    " --     let lines[i] = s:getTransformedLine(lines[i])
+    " --     let i = i + 1
+    " -- endwhile
+
+    " -- " Transform entire list of lines
+    " -- let transformedLines = s:getTransformedLines(lines)
+
+    let escapedLines = s:getShellEscapedLines(lines)
+    let error =  s:sendTextToPbCopy(escapedLines)
+
+    " Reset the selection and register contents
+    let &selection = sel_save
+    " let @@ = reg_save
+endfunction
