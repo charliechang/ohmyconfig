@@ -69,7 +69,11 @@ set switchbuf=useopen
 set autoread
 
 " ##### Ack #####
-let g:ackprg = "sibgs -s"
+if $TW_JOB_NAME == 'sigma'
+    let g:ackprg = "sibgs -s"
+else
+    echom 'g:ackprg is not set properly'
+endif
 
 " ##### 81 #####
 set colorcolumn=81
