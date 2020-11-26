@@ -9,19 +9,17 @@ set expandtab
 set wildmenu
 set wildmode=list:longest,full
 
+set rtp+=/usr/local/share/myc/vim
 set rtp+=~/.vim/bundle/Vundle.vim
 call vundle#begin()
     Plugin 'VundleVim/Vundle.vim'
     Plugin 'scrooloose/nerdtree'
-    Plugin 'ctrlpvim/ctrlp.vim'
     Plugin 'Raimondi/delimitMate'
     Plugin 'Yggdroot/indentLine'
     Plugin 'vim-airline/vim-airline'
     Plugin 'bling/vim-bufferline'
     Plugin 'mileszs/ack.vim'
     Plugin 'christoomey/vim-tmux-navigator'
-	Plugin 'prabirshrestha/async.vim'
-	Plugin 'prabirshrestha/vim-lsp'
 call vundle#end()            " required
 filetype plugin indent on    " required
 
@@ -70,17 +68,11 @@ nnoremap ls :ls<CR>
 set switchbuf=useopen
 set autoread
 
-" ##### Sigma #####
-if executable('sigma_lsp')
-    au User lsp_setup call lsp#register_server({
-        \ 'name': 'sigma_lsp',
-        \ 'cmd': {server_info -> ['sigma_lsp']},
-        \ 'whitelist': ['hs','haskell'],
-        \ })
-endif
+" ##### Ack #####
+let g:ackprg = "sibgs -s"
 
-let g:lsp_log_verbose=1
-let g:lsp_log_file=expand('~/vim-lsp.log')
+" ##### 81 #####
+set colorcolumn=81
 
 " ##### pbcopy #####
 
