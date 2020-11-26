@@ -1,4 +1,5 @@
-set background = "light"
+set background=light
+highlight LineNr ctermfg=grey
 set backspace=indent,eol,start
 set rnu
 set nu
@@ -9,6 +10,8 @@ set softtabstop=4
 set expandtab
 set wildmenu
 set wildmode=list:longest,full
+
+
 
 set cursorline
 highlight  CursorLine ctermbg=None ctermfg=None
@@ -56,10 +59,9 @@ set switchbuf=useopen
 set autoread
 
 " ##### Clipboard #####
-set clipboard+=unnamedplus
+set clipboard+=unnamed,unnamedplus
 let g:clipboard={
 \    'name': 'ncat',
-\    'copy': { '+': 'nc -w1 localhost 8377', '*': 'nc -w1 localhost 8377' },
-\    'paste': { '+': 'true', '*': 'true'},
-\    'cache_enabled': 1,
+\    'copy': { '+': 'bash -c /tmp/mypbcopy.sh', '*': 'bash -c /tmp/mypbcopy.sh' },
+\    'paste': { '+': 'tmux show-buffer', '*': 'tmux show-buffer'},
 \ }
