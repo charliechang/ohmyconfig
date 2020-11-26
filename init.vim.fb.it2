@@ -11,7 +11,17 @@ set expandtab
 set wildmenu
 set wildmode=list:longest,full
 
-
+call plug#begin()
+    Plug 'scrooloose/nerdtree'
+    Plug 'Raimondi/delimitMate'
+    Plug 'Yggdroot/indentLine'
+    Plug 'vim-airline/vim-airline'
+    Plug 'bling/vim-bufferline'
+    Plug 'mileszs/ack.vim'
+    Plug 'christoomey/vim-tmux-navigator'
+    Plug 'hhvm/vim-hack'
+    Plug 'dense-analysis/ale'
+call plug#end()
 
 set cursorline
 highlight  CursorLine ctermbg=None ctermfg=None
@@ -62,6 +72,6 @@ set autoread
 set clipboard+=unnamed,unnamedplus
 let g:clipboard={
 \    'name': 'ncat',
-\    'copy': { '+': 'bash -c /tmp/mypbcopy.sh', '*': 'bash -c /tmp/mypbcopy.sh' },
+\    'copy': { '+': 'bash -c /tmp/ohmyconfig/mypbcopy.sh', '*': 'bash -c /tmp/ohmyconfig/mypbcopy.sh' },
 \    'paste': { '+': 'tmux show-buffer', '*': 'tmux show-buffer'},
 \ }
