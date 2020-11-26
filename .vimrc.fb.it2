@@ -9,7 +9,6 @@ set expandtab
 set wildmenu
 set wildmode=list:longest,full
 
-set rtp+=/usr/local/share/myc/vim
 set rtp+=~/.vim/bundle/Vundle.vim
 call vundle#begin()
     Plugin 'VundleVim/Vundle.vim'
@@ -20,6 +19,8 @@ call vundle#begin()
     Plugin 'bling/vim-bufferline'
     Plugin 'mileszs/ack.vim'
     Plugin 'christoomey/vim-tmux-navigator'
+    Plugin 'hhvm/vim-hack'
+    Plugin 'dense-analysis/ale'
 call vundle#end()            " required
 filetype plugin indent on    " required
 
@@ -67,6 +68,26 @@ nnoremap ls :ls<CR>
 
 set switchbuf=useopen
 set autoread
+
+" ##### MYC #####
+set rtp+=/usr/local/share/myc/vim
+nmap <leader>t :MYC<CR>
+
+" ##### ALE #####
+noremap gd :ALEGoToDefinition<CR>
+noremap gr :ALEFindReferences<CR>
+
+" ##### Hack #####
+if $TW_JOB_NAME == 'www' 
+    let g:hack#enable=0
+    let g:flow#enable=0
+    let g:ale_linters = {
+    \ 'php':['hh'],
+    \}
+    let g:ale_fixers = {
+    \ 'php':['hackfmt'],
+    \}
+endif
 
 " ##### Ack #####
 if $TW_JOB_NAME == 'sigma'
