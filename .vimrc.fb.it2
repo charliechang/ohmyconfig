@@ -71,6 +71,8 @@ set autoread
 " ##### Ack #####
 if $TW_JOB_NAME == 'sigma'
     let g:ackprg = "sibgs -s"
+elseif $TW_JOB_NAME == 'www' 
+    let g:ackprg = "tbgs -s"
 else
     echom 'g:ackprg is not set properly'
 endif
