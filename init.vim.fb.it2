@@ -21,6 +21,8 @@ call plug#begin()
     Plug 'christoomey/vim-tmux-navigator'
     Plug 'hhvm/vim-hack'
     Plug 'dense-analysis/ale'
+    Plug 'prabirshrestha/async.vim'
+    Plug 'prabirshrestha/vim-lsp'
 call plug#end()
 
 set cursorline
@@ -72,10 +74,20 @@ set autoread
 set rtp+=/usr/local/share/myc/vim
 nmap <leader>t :MYC<CR>
 
-" ##### ALE #####
-nnoremap <silent> K :ALEHover<CR>
-noremap <silent> gd :ALEGoToDefinition<CR>
-noremap <silent> gr :ALEFindReferences<CR>
+" ##### Sigma #####
+if $TW_JOB_NAME == 'sigma'
+    au User lsp_setup call lsp#register_server({
+        \ 'name': 'sigma_lsp',
+        \ 'cmd': {server_info -> ['sigma_lsp']},
+        \ 'whitelist': ['hs','haskell'],
+        \ })
+
+    let g:lsp_log_verbose=1
+    let g:lsp_log_file=expand('~/vim-lsp.log')
+    nmap <buffer> K <plug>(lsp-hover)
+    nmap <buffer> gd <plug>(lsp-definition)
+    nmap <buffer> gr <plug>(lsp-references)
+endif
 
 " ##### Hack #####
 if $TW_JOB_NAME == 'www' 
@@ -93,6 +105,10 @@ if $TW_JOB_NAME == 'www'
       let g:ale_set_balloons = 1
       let balloondelay = 250
     endif
+    nnoremap <silent> K :ALEHover<CR>
+    noremap <silent> gd :ALEGoToDefinition<CR>
+    noremap <silent> gr :ALEFindReferences<CR>
+
 endif
 
 " ##### Ack #####
