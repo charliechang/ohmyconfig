@@ -68,6 +68,45 @@ nnoremap ls :ls<CR>
 set switchbuf=useopen
 set autoread
 
+" ##### MYC #####
+set rtp+=/usr/local/share/myc/vim
+nmap <leader>t :MYC<CR>
+
+" ##### ALE #####
+nnoremap <silent> K :ALEHover<CR>
+noremap <silent> gd :ALEGoToDefinition<CR>
+noremap <silent> gr :ALEFindReferences<CR>
+
+" ##### Hack #####
+if $TW_JOB_NAME == 'www' 
+    " Automatic completion
+    let g:ale_completion_enabled = 1
+    set omnifunc=ale#completion#OmniFunc
+    " Include the linter name (e.g. 'hack' or 'hhast'), code, and message in errors
+    let g:ale_echo_msg_format = '[%linter%]% [code]% %s'
+    " Enable HHAST - this has security implications (see below)
+    let g:ale_linters = { 'hack': ['hack', 'hhast'] }
+
+    " show type on hover in a floating bubble
+    if v:version >= 801
+      set balloonevalterm
+      let g:ale_set_balloons = 1
+      let balloondelay = 250
+    endif
+endif
+
+" ##### Ack #####
+if $TW_JOB_NAME == 'sigma'
+    let g:ackprg = "sibgs -s"
+elseif $TW_JOB_NAME == 'www' 
+    let g:ackprg = "tbgs -s"
+else
+    echom 'g:ackprg is not set properly'
+endif
+
+" ##### 81 #####
+set colorcolumn=81
+
 " ##### Clipboard #####
 set clipboard+=unnamed,unnamedplus
 let g:clipboard={
@@ -75,3 +114,4 @@ let g:clipboard={
 \    'copy': { '+': 'bash -c /tmp/ohmyconfig/mypbcopy.sh', '*': 'bash -c /tmp/ohmyconfig/mypbcopy.sh' },
 \    'paste': { '+': 'tmux show-buffer', '*': 'tmux show-buffer'},
 \ }
+
