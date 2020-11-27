@@ -84,7 +84,7 @@ if $TW_JOB_NAME == 'sigma'
 
     let g:lsp_log_verbose=1
     let g:lsp_log_file=expand('~/vim-lsp.log')
-    noremap <silent> K :LspHover<CR>
+    nnoremap <silent> K :LspHover<CR>
     noremap <silent> gd :LspDefinition<CR>
     noremap <silent> gr :LspReferences<CR>
 endif
