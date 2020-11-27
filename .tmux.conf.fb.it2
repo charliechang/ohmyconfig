@@ -1,8 +1,11 @@
 set -g default-command "${SHELL}"
 set -g history-limit 500000
-set -g status-right "#{s/.facebook.com//:host} ‚Ä¢ %Y-%m-%d %H:%M"
+set -g status-right "#{s/.facebook.com//:host} ‚Äö%Y-%m-%d %H:%M"
 set -s default-terminal "tmux-256color"
 set -s escape-time 0
+
+if-shell -b '[ "$TW_JOB_NAME" == "sigma" ]' 'set -g status-left "#(/tmp/ohmyconfig/sigma-lsp-status.sh)"'
+set -g status-interval 1
 
 # #### Actions ####
 # brew install reattach-to-user-namespace
