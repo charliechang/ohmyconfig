@@ -70,6 +70,12 @@ nnoremap ls :ls<CR>
 set switchbuf=useopen
 set autoread
 
+" ##### Windows Resize #####
+map <leader><Up> :resize +5<CR>
+map <leader><Down> :resize -5<CR>
+map <leader><Left> :vertical resize +5<CR>
+map <leader><Right> :vertical resize -5<CR>
+
 " ##### MYC #####
 set rtp+=/usr/local/share/myc/vim
 nmap <leader>t :MYC<CR>
