@@ -159,5 +159,5 @@ endfunction
 
 if $TW_JOB_NAME == 'www' 
     command! -range -nargs=1 HackFmt <line1>,<line2>call HackFmt(<args>)
-    map <leader>ll :HackFmt<Home>silent <End> 80<CR>
+    map <leader>l :HackFmt<Home>silent <End> 80<CR>
 endif
