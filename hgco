@@ -1,7 +1,7 @@
 #!/bin/bash
 # This script help you to checkout the commit by running `hg ssl`
 # Usage: hgco [n] where checkout the n-th commit in the return of `hg ssl`. 
-# n is 1 when ommited.
+# n is 1 when ommited
 
 pushd $(pwd)
 if [[ $TW_JOB_NAME == "sigma" ]]; then
@@ -13,15 +13,18 @@ else
     exit 1
 fi
 NUM_COMMIT=${1:-1}
-echo $NUM_COMMIT
-COMMIT_ID=$(hg ssl | grep $USER | egrep -o '[a-e0-9]{9,}' | head -n $NUM_COMMIT | tail -n 1)
+COMMIT_ID=$(hg ssl | egrep "[^/]$USER" | egrep -o '[a-e0-9]{9,}' | head -n $NUM_COMMIT | tail -n 1)
 if [[ -z  "$COMMIT_ID" ]]; then
     >&2 echo "Your commit not found"
+    popd
     exit 1
 fi
 COMMIT_MSG=$(hg ssl | grep -A 1 "$COMMIT_ID")
 echo $COMMIT_MSG
-if [[ "$(hg id)" != "$COMMIT_ID" ]]; then
+HGID=$(hg id)
+if [[ "${HGID:0:9}" != "${COMMIT_ID:0:9}" ]]; then
     hg co $COMMIT_ID
+else 
+    echo "This commit has been checkout."
 fi
 popd
