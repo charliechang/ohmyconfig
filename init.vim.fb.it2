@@ -70,6 +70,11 @@ nnoremap ls :ls<CR>
 set switchbuf=useopen
 set autoread
 
+" ##### Highlight and trim trailing spaces on file save #####
+highlight ExtraWhitespace ctermbg=red guibg=red
+match ExtraWhitespace /\s\+$/
+autocmd BufWritePre * :%s/\s\+$//e
+
 " ##### Windows Resize #####
 map <leader><Up> :resize +5<CR>
 map <leader><Down> :resize -5<CR>
