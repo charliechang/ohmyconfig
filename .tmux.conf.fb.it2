@@ -1,6 +1,6 @@
 set -g default-command "${SHELL}"
 set -g history-limit 500000
-set -g status-right "#{s/.facebook.com//:host} ‚Äö%Y-%m-%d %H:%M"
+set -g status-right "#{s/.facebook.com//:host} ‚%Y-%m-%d %H:%M"
 set -s default-terminal "tmux-256color"
 set -s escape-time 0
 
