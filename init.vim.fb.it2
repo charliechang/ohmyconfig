@@ -4,9 +4,9 @@ set backspace=indent,eol,start
 set rnu
 set nu
 syntax on
-set tabstop=2.      " FB-specific
-set shiftwidth=2.   " FB-specific
-set softtabstop=2.  " FB-specific
+set tabstop=2      " FB-specific
+set shiftwidth=2   " FB-specific
+set softtabstop=2  " FB-specific
 set expandtab
 set wildmenu
 set wildmode=list:longest,full
