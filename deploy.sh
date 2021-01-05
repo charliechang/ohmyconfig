@@ -23,3 +23,4 @@ if [[ "$TW_JOB_NAME" == "sigma" ]]; then
 elif [[ "$TW_JOB_NAME" == "www" ]]; then 
   cd ~/www
 fi
+exec bash #for staying at the folder
