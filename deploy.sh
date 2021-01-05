@@ -1,4 +1,4 @@
-!/bin/bash
+#!/bin/bash
 
 # Configure tmux.conf
 ln -sf /tmp/ohmyconfig/.tmux.conf.fb.it2 ~/.tmux.conf
