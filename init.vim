@@ -10,6 +10,7 @@
 " curl -fLo ~/.local/share/nvim/site/autoload/plug.vim --create-dirs \
 "    https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
 " xcode-select --install # May need this line for new Mac OS before running
+" brew install fzf
 " # plugin YouCompleteMe
 " nvim +PlugInstall
 " :CocConfig
@@ -30,15 +31,18 @@ filetype plugin indent on
 " filetype off                  " required
 call plug#begin()
     Plug 'scrooloose/nerdtree'
-    Plug 'ctrlpvim/ctrlp.vim'
-    Plug 'Raimondi/delimitMate'
+"    Plug 'ctrlpvim/ctrlp.vim'
+"    Plug 'Raimondi/delimitMate'
     Plug 'Yggdroot/indentLine'
     Plug 'vim-airline/vim-airline'
     Plug 'bling/vim-bufferline'
-    Plug 'mileszs/ack.vim'
     Plug 'christoomey/vim-tmux-navigator'
-    Plug 'Valloric/YouCompleteMe', { 'do': './install.py' }
-    Plug 'neoclide/coc.nvim', {'branch': 'release'}
+    Plug 'junegunn/fzf'
+    Plug 'duane9/nvim-rg'
+    Plug 'xiyaowong/transparent.nvim'
+"    Plug 'jremmen/vim-ripgrep'
+"    Plug 'Valloric/YouCompleteMe', { 'do': './install.py' }
+"    Plug 'neoclide/coc.nvim', {'branch': 'release'}
 call plug#end()
 filetype plugin indent on    " required
 
@@ -70,8 +74,11 @@ set foldlevel=1
 
 " autocmd VimEnter * NERDTree
 nnoremap <C-n> :NERDTreeToggle<CR>
-nnoremap cdc :cd %:p:h<CR>:pwd<CR>
-noremap gs :vimgrep /<C-r><C-w>/gj ./**<CR>
+nnoremap <C-p> :FZF<cr>
+nnoremap <C-f> :Rg <C-r><C-w><cr>
+
+" nnoremap cdc :cd %:p:h<CR>:pwd<CR>
+" noremap gs :vimgrep /<C-r><C-w>/gj ./**<CR>
 set laststatus=2
 " enable tabline
  let g:airline#extensions#tabline#enabled = 1
@@ -119,7 +126,7 @@ set wildignore+=*/tmp/*,*.so,*.swp,*.zip
 set wildignore+=*/site-packages/*,*.pyc,*.class,*.o
 set wildignore+=*/target/*
 let NERDTreeIgnore = ['\.o$','\.pyc$','\.class$']
-cnoreabbrev Ack Ack!
+" cnoreabbrev Ack Ack!
 cnoreabbrev Q! q!
 cnoreabbrev Wq wq
 cnoreabbrev WQ wq
