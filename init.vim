@@ -1,8 +1,7 @@
 " #### Actions ####
-" brew install ack neovim
+" brew install ripgrep fzf neovim
 " mkdir -p ~/.config/nvim
 " ln -sf $(pwd)/init.vim ~/.config/nvim/
-" stty -ixon >> ~/.zshrc
 " echo "alias vim='nvim'" >> ~/.zshrc
 " echo "export LC_ALL='C'" >> ~/.zshrc
 " python3 -m pip install --user --upgrade pynvim
@@ -10,19 +9,7 @@
 " curl -fLo ~/.local/share/nvim/site/autoload/plug.vim --create-dirs \
 "    https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
 " xcode-select --install # May need this line for new Mac OS before running
-" brew install fzf
-" # plugin YouCompleteMe
 " nvim +PlugInstall
-" :CocConfig
-"{
-"    "java.jdt.ls.vmargs": "-javaagent:/Users/cchang/Work/lombok.jar -Xbootclasspath/a:/Users/cchang/Work/lombok.jar",
-"    "java.format.enabled": true,
-"    "java.import.maven.enabled": true,
-"    "java.autobuild.enabled": true,
-"    "java.signatureHelp.enabled": true,
-"    "java.completion.enabled": true
-"}
-" :CocInstall coc-java
 
 
 set nocompatible              " be iMproved, required
@@ -31,8 +18,6 @@ filetype plugin indent on
 " filetype off                  " required
 call plug#begin()
     Plug 'scrooloose/nerdtree'
-"    Plug 'ctrlpvim/ctrlp.vim'
-"    Plug 'Raimondi/delimitMate'
     Plug 'Yggdroot/indentLine'
     Plug 'vim-airline/vim-airline'
     Plug 'bling/vim-bufferline'
@@ -40,9 +25,6 @@ call plug#begin()
     Plug 'junegunn/fzf'
     Plug 'duane9/nvim-rg'
     Plug 'xiyaowong/transparent.nvim'
-"    Plug 'jremmen/vim-ripgrep'
-"    Plug 'Valloric/YouCompleteMe', { 'do': './install.py' }
-"    Plug 'neoclide/coc.nvim', {'branch': 'release'}
 call plug#end()
 filetype plugin indent on    " required
 
@@ -98,15 +80,6 @@ nnoremap b6 :b6<CR>
 nnoremap b7 :b7<CR>
 nnoremap b8 :b8<CR>
 nnoremap b9 :b9<CR>
-
-nmap <silent> gd <Plug>(coc-definition)
-nmap <silent> gy <Plug>(coc-type-definition)
-nmap <silent> gi <Plug>(coc-implementation)
-nmap <silent> gr <Plug>(coc-references)
-
-nnoremap <leader>b  :YcmCompleter GoTo<CR>
-let g:ycm_filetype_whitelist={'python':1}
-let g:ycm_global_ycm_extra_conf = '~/.config/nvim/plugged/YouCompleteMe/third_party/ycmd/.ycm_extra_conf.py'
 
 set switchbuf=useopen
 set autoread
