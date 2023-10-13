@@ -11,13 +11,22 @@ if not vim.loop.fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 
-require("lazy").setup({
-  "scrooloose/nerdtree",
-  "christoomey/vim-tmux-navigator",
-  "Yggdroot/indentLine",
-  "vim-airline/vim-airline",
-  "bling/vim-bufferline",
-  "junegunn/fzf",
-  "duane9/nvim-rg",
-  "xiyaowong/transparent.nvim",
-})
+local plugins =
+  { 
+    {
+      import = "plugins"
+    },
+  }
+
+local opts =
+  {
+    checker = {
+      enabled = true,
+      notify = false,
+    },
+    change_detection = {
+      notify = false,
+    },
+  }
+
+require("lazy").setup(plugins, opts)
