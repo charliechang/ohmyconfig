@@ -1,6 +1,9 @@
 return {
-  "junegunn/fzf",
+  "junegunn/fzf.vim",
+  dependencies = {
+    "junegunn/fzf",
+  },
   config = function()
-    vim.keymap.set("n", "<C-p>", ":FZF<cr>")
+    vim.keymap.set("n", "<C-p>", ":Files<cr>")
   end,
 }
