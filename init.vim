@@ -1,7 +1,7 @@
 " #### Actions ####
 " brew install ripgrep fzf neovim
 " mkdir -p ~/.config/nvim
-" ln -sf $(pwd)/init.vim ~/.config/nvim/
+" ln -sf $(pwd)/nvim ~/.config/nvim
 " echo "alias vim='nvim'" >> ~/.zshrc
 " echo "export LC_ALL='C'" >> ~/.zshrc
 " python3 -m pip install --user --upgrade pynvim
