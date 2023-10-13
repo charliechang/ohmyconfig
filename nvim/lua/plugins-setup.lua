@@ -21,5 +21,3 @@ require("lazy").setup({
   "duane9/nvim-rg",
   "xiyaowong/transparent.nvim",
 })
-
-require("plugins.nerdtree")
