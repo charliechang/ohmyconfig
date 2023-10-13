@@ -22,4 +22,4 @@ require("lazy").setup({
   "xiyaowong/transparent.nvim",
 })
 
-
+require("plugins.nerdtree")
