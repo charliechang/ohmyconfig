@@ -8,7 +8,8 @@ brew install zsh git
 # initialization $HOME~/.zshrc
 touch ~/.zshrc
 echo 'ZSH_CUSTOM="$HOME/.oh-my-zsh/custom"' >> ~/.zshrc
-echo 'alias ll="ls -la --color=auto"'
+echo 'alias ll="ls -la --color=auto"' >> ~/.zshrc
+echo 'alias tmux="tmux -u"' >> ~/.zshrc
 source ~/.zshrc
 
 # Install powerlevel10k
