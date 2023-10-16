@@ -1,5 +1,8 @@
 return {
   "scrooloose/nerdtree",
+  dependencies = { 
+    "ryanoasis/vim-devicons"
+  },
   config = function()
     vim.cmd("set wildignore+=*/tmp/*,*.so,*.swp,*.zip")
     vim.cmd("set wildignore+=*/site-packages/*,*.pyc,*.class,*.o")

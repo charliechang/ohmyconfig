@@ -14,3 +14,5 @@ keymap.set("n", "b6", ":b6<CR>")
 keymap.set("n", "b7", ":b7<CR>")
 keymap.set("n", "b8", ":b8<CR>")
 keymap.set("n", "b9", ":b9<CR>")
+
+keymap.set("n", "<C-S>", ":w!<CR>")
