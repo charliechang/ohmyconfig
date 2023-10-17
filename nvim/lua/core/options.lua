@@ -25,7 +25,7 @@ opt.cursorline = true -- highlight the current cursor line
 -- turn on termguicolors for nightfly colorscheme to work
 -- (have to use iterm2 or any other true color terminal)
 opt.termguicolors = true
--- opt.background = "dark" -- colorschemes that can be light or dark will be made dark
+opt.background = "dark" -- colorschemes that can be light or dark will be made dark
 opt.signcolumn = "yes" -- show sign column so that text doesn't shift
 
 -- backspace
@@ -43,3 +43,6 @@ opt.iskeyword:append("-") -- consider string-string as whole word
 -- fold mode
 vim.cmd("set foldmethod=indent")
 vim.cmd("set foldlevel=1")
+
+-- color scheme
+vim.cmd [[colorscheme darkblue]]

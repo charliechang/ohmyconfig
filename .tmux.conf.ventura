@@ -17,10 +17,10 @@ set -sg escape-time 0
 bind -T prefix | split-window -h
 bind -T prefix - split-window -v
 
-set-option -g window-style 'fg=black,bg=#abccaf'
-set-option -g window-active-style 'fg=black,bg=#c7edcc'
-set-option -g pane-border-style 'bg=#abccaf'
-set-option -g pane-active-border-style 'bg=#c7edcc'
+# set-option -g window-style 'fg=black,bg=#abccaf'
+# set-option -g window-active-style 'fg=black,bg=#c7edcc'
+# set-option -g pane-border-style 'bg=#abccaf'
+# set-option -g pane-active-border-style 'bg=#c7edcc'
 
 is_vim="ps -o state= -o comm= -t '#{pane_tty}' \
     | grep -iqE '^[^TXZ ]+ +(\\S+\\/)?g?(view|n?vim?x?)(diff)?$'"
