@@ -53,6 +53,9 @@ return   {
       keymap.set("n", "<leader>rs", ":LspRestart<CR>", opts) -- mapping to restart lsp if necessary
     end
 
+    require("mason").setup()
+    require("mason-lspconfig").setup()
+
     lspconfig.gopls.setup {
       on_attach = on_attach,
       capabilities = capabilities,
