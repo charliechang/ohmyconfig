@@ -1,4 +1,4 @@
-vim.g.mapleader = "<Space>" -- Place before lazyvim loaded otherwise a warn message will be promoted.
+vim.g.mapleader = "\\" -- Place before lazyvim loaded otherwise a warn message will be promoted.
 
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not vim.loop.fs_stat(lazypath) then
