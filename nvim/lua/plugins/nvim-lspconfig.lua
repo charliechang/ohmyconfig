@@ -13,14 +13,11 @@ return   {
       opts.buffer = bufnr
 
       -- set keybinds
-      vim.cmd('noremap <silent> gi :Telescope lsp_implementations<CR>')
-      vim.cmd('noremap <silent> gr :Telescope lsp_references<CR>')
-      vim.cmd('noremap <silent> gd :Telescope lsp_definitions<CR>')
-      vim.cmd('noremap <silent> ga :lua vim.lsp.buf.code_action()<CR>')
+      vim.keymap.set("n", 'gi', require("telescope.builtin").lsp_implementations, { buffer = bufnr, desc = "[g]oto [i]mplementations" })
+      vim.keymap.set("n", 'gr', require("telescope.builtin").lsp_references, { buffer = bufnr, desc = "[g]oto [r]eferences" })
+      vim.keymap.set("n", 'gd', require("telescope.builtin").lsp_definitions, { buffer = bufnr, desc = "[g]oto [d]efinitions" })
+      vim.keymap.set("n", 'ga', vim.lsp.buf.code_action, { buffer = bufnr, desc = "[g]oto [a]ctions" })
     end
-
-    require("mason").setup()
-    require("mason-lspconfig").setup()
 
     lspconfig["gopls"].setup {
       on_attach = on_attach,
