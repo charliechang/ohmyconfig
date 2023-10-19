@@ -22,7 +22,7 @@ return   {
     require("mason").setup()
     require("mason-lspconfig").setup()
 
-    lspconfig.gopls.setup {
+    lspconfig["gopls"].setup {
       on_attach = on_attach,
       capabilities = capabilities,
       cmd = {"gopls"},
@@ -38,5 +38,11 @@ return   {
         },
       },
     }
+    lspconfig["pyright"].setup({
+      capabilities = capabilities,
+      on_attach = on_attach,
+      filetypes = {"python"},
+      root_dir = util.root_pattern("requirements.txt",".git"),
+    })
   end,
 }

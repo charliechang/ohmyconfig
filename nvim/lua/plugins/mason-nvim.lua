@@ -4,6 +4,8 @@ return  {
   opts = {
     ensure_installed = {
       "gopls",
+      "pyright",
     },
+    automatic_installation = true,
   },
 }
