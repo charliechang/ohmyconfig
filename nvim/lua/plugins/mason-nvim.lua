@@ -16,6 +16,7 @@ return  {
       ensure_installed = {
         "gopls",
         "pyright",
+        "terraformls",
       },
       automatic_installation = true, -- not the same as ensure_installed
     })
@@ -24,7 +25,6 @@ return  {
       ensure_installed = {
         "pylint" ,          -- linter: python
         "golangci-lint",    -- linter: go
-        "djlint",           -- linter: go
       },
     })
   end,
