@@ -9,5 +9,6 @@ return {
     vim.cmd("set wildignore+=*/target/*")
 --    vim.cmd("let NERDTreeIgnore = ['.o$','.pyc$','.class$']")
     vim.keymap.set("n", "<C-n>", ":NERDTreeToggle<CR>")
+    vim.cmd("let g:NERDTreeWinSize=60")
   end,
 }
