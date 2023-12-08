@@ -7,6 +7,7 @@
   echo "export LC_ALL='C'" >> ~/.zshrc
   brew tap homebrew/cask-fonts
   brew install font-hack-nerd-font
+  go install github.com/go-delve/delve/cmd/dlv@latest
 ]]
 
 require("plugins-setup")
