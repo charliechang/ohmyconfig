@@ -10,5 +10,6 @@ return {
   config = function()
     vim.keymap.set("n", "<C-p>", "<cmd>Telescope find_files<cr>")
     vim.keymap.set("n", "<C-f>", "<cmd>Telescope grep_string<cr>")
+    vim.keymap.set("n", "<C-g>", "<cmd>Telescope live_grep<cr>")
   end,
 }
