@@ -8,6 +8,8 @@
   brew tap homebrew/cask-fonts
   brew install font-hack-nerd-font
   go install github.com/go-delve/delve/cmd/dlv@latest
+
+  :MasonInstall rust-analyzer
 ]]
 
 require("plugins-setup")

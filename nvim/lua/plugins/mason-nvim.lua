@@ -18,6 +18,7 @@ return  {
         "pyright",
         "terraformls",
         "bashls",
+        "rust_analyzer",
       },
       automatic_installation = true, -- not the same as ensure_installed
     })
@@ -26,6 +27,7 @@ return  {
       ensure_installed = {
         "pylint" ,          -- linter: python
         "golangci-lint",    -- linter: go
+        "codelldb",         -- for Rust
       },
     })
   end,

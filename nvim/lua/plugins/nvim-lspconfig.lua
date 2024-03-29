@@ -60,6 +60,12 @@ return   {
         })
       end,
     })
+    lspconfig['rust_analyzer'].setup({
+      capabilities = capabilities,
+      on_attach = on_attach,
+      filetypes = {"rust"},
+      root_dir = util.root_pattern("Cargo.toml"),
+    })
 
   end,
 }
