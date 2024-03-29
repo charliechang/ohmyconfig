@@ -19,6 +19,7 @@ return  {
         "terraformls",
         "bashls",
         "rust_analyzer",
+        "tsserver",
       },
       automatic_installation = true, -- not the same as ensure_installed
     })
