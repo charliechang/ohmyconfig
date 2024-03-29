@@ -73,5 +73,17 @@ return   {
       on_attach = on_attach,
     })
 
+    lspconfig["dockerls"].setup({
+      capabilities = capabilities,
+      on_attach = on_attach,
+      filetypes = {"dockerfile"},
+    })
+
+    lspconfig["docker_compose_language_service"].setup({
+      capabilities = capabilities,
+      on_attach = on_attach,
+      filetypes = {"yaml"},
+    })
+
   end,
 }

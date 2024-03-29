@@ -20,6 +20,8 @@ return  {
         "bashls",
         "rust_analyzer",
         "tsserver",
+        "dockerls",
+        "docker_compose_language_service",
       },
       automatic_installation = true, -- not the same as ensure_installed
     })
