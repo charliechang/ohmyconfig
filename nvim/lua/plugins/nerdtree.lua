@@ -1,5 +1,6 @@
 return {
   "scrooloose/nerdtree",
+  event = "VeryLazy",
   dependencies = { 
     "ryanoasis/vim-devicons"
   },
