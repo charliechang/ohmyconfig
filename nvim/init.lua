@@ -10,6 +10,7 @@
   go install github.com/go-delve/delve/cmd/dlv@latest
 
   :MasonInstall rust-analyzer
+  # Install Ollama (<https://ollama.com/>) and run `ollama pull llama3`
 ]]
 
 require("plugins-setup")
