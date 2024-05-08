@@ -8,7 +8,7 @@ return {
     local gen = require('gen')
 
     gen.prompts['01_Fix_Typo_Only'] = {
-      prompt = "Fix following text if there are any typos, just output the final text:\n$text",
+      prompt = "Fix the following text if there are any typos, just output the final text:\n$text",
       replace = true,
     }
 
