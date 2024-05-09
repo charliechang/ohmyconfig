@@ -17,7 +17,12 @@ return {
       replace = true,
     }
 
+    gen.prompts['03_Code_Completion'] = {
+      prompt = "Complete the following code, just output the final code and comments without additional markdown around it:\n$text",
+      replace = true,
+    }
 
     vim.keymap.set('v', 'z=', ':Gen 01_Fix_Typo_Only<CR>')
+    vim.keymap.set('v', 'zg', ':Gen<CR>')
   end,
 }
