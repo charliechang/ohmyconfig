@@ -22,6 +22,11 @@ return {
       replace = true,
     }
 
+    gen.prompts['04_Explain_Code'] = {
+      prompt = "Explain the following $filetype code:\n$text",
+      replace = false,
+    }
+
     vim.keymap.set('v', 'z=', ':Gen 01_Fix_Typo_Only<CR>')
     vim.keymap.set('v', 'zg', ':Gen<CR>')
   end,
