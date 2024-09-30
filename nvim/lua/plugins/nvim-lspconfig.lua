@@ -46,7 +46,7 @@ return   {
     vim.api.nvim_create_autocmd({"BufWritePre"}, {
       pattern = {"*.tf", "*.tfvars"},
       callback = function()
-        --vim.lsp.buf.format()
+        vim.lsp.buf.format()
       end,
     })
 
@@ -68,7 +68,7 @@ return   {
       root_dir = util.root_pattern("Cargo.toml"),
     })
 
-    lspconfig['tsserver'].setup({
+    lspconfig['ts_ls'].setup({
       capabilities = capabilities,
       on_attach = on_attach,
     })

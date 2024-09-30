@@ -19,7 +19,7 @@ return  {
         "terraformls",
         "bashls",
         "rust_analyzer",
-        "tsserver",
+        "ts_ls",
         "dockerls",
         "docker_compose_language_service",
       },
