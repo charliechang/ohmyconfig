@@ -4,9 +4,14 @@ return {
   lazy = false,
   version = false, -- set this if you want to always pull the latest change
   opts = {
-    provider = "openai",
+    provider = "azure",
     openai = {
       model = "gpt-4o-mini",
+    },
+    azure = {
+      api_version = "2024-02-15-preview",
+      deployment = "CTOTestingUsage",
+      endpoint = "https://ctoenvtestingcanadaeast.openai.azure.com",
     },
   },
   -- if you want to build from source then do `make BUILD_FROM_SOURCE=true`
