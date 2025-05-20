@@ -2,11 +2,10 @@ return {
   "yetone/avante.nvim",
   event = "VeryLazy",
   lazy = false,
-  --version = false,
-  version = '0.0.9',
+  version = '0.0.23',
   opts = {
-    provider = "azure",
-    --provider = "ollama7b",
+    --provider = "azure",
+    provider = "llm-gateway",
     openai = {
       model = "gpt-4o-mini",
     },
@@ -17,28 +16,11 @@ return {
     },
     vendors = {
       ---@type AvanteProvider
-      ollama7b = {
-        ["local"] = true,
-        endpoint = "127.0.0.1:11434/v1",
-        model = "qwen2.5-coder:7b",
-        parse_curl_args = function(opts, code_opts)
-          return {
-            url = opts.endpoint .. "/chat/completions",
-            headers = {
-              ["Accept"] = "application/json",
-              ["Content-Type"] = "application/json",
-            },
-            body = {
-              model = opts.model,
-              messages = require("avante.providers").copilot.parse_messages(code_opts), -- you can make your own message, but this is very advanced
-              max_tokens = 2048,
-              stream = true,
-            },
-          }
-        end,
-        parse_response_data = function(data_stream, event_state, opts)
-          require("avante.providers").copilot.parse_response(data_stream, event_state, opts)
-        end,
+      ["llm-gateway"] = {
+        __inherited_from = 'openai',
+        endpoint = "https://llm-gateway.engineering-dev.kkcompany-internal.com/v1",
+        model = "gpt-4o",
+        api_key_name = "LLM_GATEWAY_TOKEN",
       },
     },
     windows = {
@@ -57,6 +39,10 @@ return {
     "nvim-lua/plenary.nvim",
     "MunifTanjim/nui.nvim",
     --- The below dependencies are optional,
+    "echasnovski/mini.pick", -- for file_selector provider mini.pick
+    "nvim-telescope/telescope.nvim", -- for file_selector provider telescope
+    "hrsh7th/nvim-cmp", -- autocompletion for avante commands and mentions
+    "ibhagwan/fzf-lua", -- for file_selector provider fzf
     "nvim-tree/nvim-web-devicons", -- or echasnovski/mini.icons
     "zbirenbaum/copilot.lua", -- for providers='copilot'
     {
