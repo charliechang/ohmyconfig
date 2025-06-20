@@ -2,25 +2,18 @@ return {
   "yetone/avante.nvim",
   event = "VeryLazy",
   lazy = false,
-  version = '0.0.23',
+  version = '0.0.25',
   opts = {
-    --provider = "azure",
-    provider = "llm-gateway",
-    openai = {
-      model = "gpt-4o-mini",
-    },
-    azure = {
-      api_version = "2024-02-15-preview",
-      deployment = "CTOTestingUsage",
-      endpoint = "https://ctoenvtestingcanadaeast.openai.azure.com",
-    },
-    vendors = {
-      ---@type AvanteProvider
-      ["llm-gateway"] = {
-        __inherited_from = 'openai',
-        endpoint = "https://llm-gateway.engineering-dev.kkcompany-internal.com/v1",
-        model = "gpt-4o",
-        api_key_name = "LLM_GATEWAY_TOKEN",
+    provider = "claude",
+    providers = {
+    claude = {
+      endpoint = "https://api.anthropic.com",
+      model = "claude-sonnet-4-20250514",
+      timeout = 30000, -- Timeout in milliseconds
+        extra_request_body = {
+          temperature = 0.75,
+          max_tokens = 20480,
+        },
       },
     },
     windows = {
