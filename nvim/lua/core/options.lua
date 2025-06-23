@@ -9,6 +9,13 @@ opt.tabstop = 2 -- 2 spaces for tabs (prettier default)
 opt.shiftwidth = 2 -- 2 spaces for indent width
 opt.expandtab = true -- expand tab to spaces
 opt.autoindent = true -- copy indent from current line when starting new one
+opt.autoread = true -- Enable autoread
+
+-- Create autocommand for checking file changes
+vim.api.nvim_create_autocmd({"FocusGained", "BufEnter", "CursorHold", "CursorHoldI"}, {
+  pattern = "*",
+  command = "if mode() != 'c' | checktime | endif",
+})
 
 -- line wrapping
 opt.wrap = true -- disable line wrapping
@@ -46,3 +53,4 @@ vim.cmd("set foldlevel=1")
 
 -- color scheme
 vim.cmd [[colorscheme habamax]]
+
