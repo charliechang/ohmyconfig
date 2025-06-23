@@ -45,4 +45,4 @@ vim.cmd("set foldmethod=indent")
 vim.cmd("set foldlevel=1")
 
 -- color scheme
-vim.cmd [[colorscheme darkblue]]
+vim.cmd [[colorscheme habamax]]
