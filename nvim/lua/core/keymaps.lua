@@ -17,3 +17,9 @@ keymap.set("n", "b8", ":b8<CR>")
 keymap.set("n", "b9", ":b9<CR>")
 
 keymap.set("n", "<C-S>", ":w!<CR>")
+
+-- Terminal mode navigation - escape terminal and move to window
+keymap.set("t", "<C-h>", "<C-\\><C-n><C-w>h", { desc = "Exit terminal and move left" })
+keymap.set("t", "<C-j>", "<C-\\><C-n><C-w>j", { desc = "Exit terminal and move down" })  
+keymap.set("t", "<C-k>", "<C-\\><C-n><C-w>k", { desc = "Exit terminal and move up" })
+keymap.set("t", "<C-l>", "<C-\\><C-n><C-w>l", { desc = "Exit terminal and move right" })
