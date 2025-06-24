@@ -23,3 +23,9 @@ keymap.set("t", "<C-h>", "<C-\\><C-n><C-w>h", { desc = "Exit terminal and move l
 keymap.set("t", "<C-j>", "<C-\\><C-n><C-w>j", { desc = "Exit terminal and move down" })  
 keymap.set("t", "<C-k>", "<C-\\><C-n><C-w>k", { desc = "Exit terminal and move up" })
 keymap.set("t", "<C-l>", "<C-\\><C-n><C-w>l", { desc = "Exit terminal and move right" })
+
+-- GitHub Copilot
+keymap.set("n", "<leader>ce", ":Copilot enable<CR>", { desc = "Enable Copilot" })
+keymap.set("n", "<leader>cd", ":Copilot disable<CR>", { desc = "Disable Copilot" })
+keymap.set("n", "<leader>cp", ":Copilot panel<CR>", { desc = "Open Copilot panel" })
+keymap.set("i", "<C-j>", 'copilot#Accept("\\<CR>")', { desc = "Accept Copilot suggestion", expr = true, replace_keycodes = false })
