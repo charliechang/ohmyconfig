@@ -40,6 +40,11 @@ return   {
       on_attach = on_attach,
       filetypes = {"python"},
       root_dir = util.root_pattern("requirements.txt",".git"),
+      settings = {
+        python = {
+          pythonPath = vim.fn.exepath("python3") or vim.fn.exepath("python"),
+        },
+      },
     })
 
     lspconfig["terraformls"].setup{}

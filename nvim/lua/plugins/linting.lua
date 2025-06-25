@@ -9,6 +9,15 @@ return {
       go = { "golangcilint" },
     }
 
+    -- Configure pylint to use the correct Python interpreter
+    lint.linters.pylint.cmd = vim.fn.exepath("python3") or vim.fn.exepath("python")
+    lint.linters.pylint.args = {
+      "-m", "pylint",
+      "--output-format=text",
+      "--msg-template='{path}:{line}:{column}:{C}: [{symbol}] {msg}'",
+      "--reports=no"
+    }
+
     local lint_augroup = vim.api.nvim_create_augroup("lint", { clear = true })
     vim.api.nvim_create_autocmd({ "BufEnter", "BufWritePost", "InsertLeave" }, {
       group = lint_augroup,
