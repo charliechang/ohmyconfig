@@ -13,8 +13,10 @@ return  {
       "bashls",
       "rust_analyzer",
       "ts_ls",
+      "tsserver",
       "dockerls",
       "docker_compose_language_service",
+      "nomicfoundation-solidity-language-server",
     },
   },
   config = function()
