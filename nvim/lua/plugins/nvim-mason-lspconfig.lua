@@ -23,7 +23,6 @@ return  {
     local mason_tool_installer = require("mason-tool-installer")
     mason_tool_installer.setup({
       ensure_installed = {
-        "pylint" ,          -- linter: python
         "codelldb",         -- for Rust
       },
     })
