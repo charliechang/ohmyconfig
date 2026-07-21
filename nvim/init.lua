@@ -10,7 +10,6 @@
   brew install node # for installation of lsp from Mason
   go install github.com/go-delve/delve/cmd/dlv@latest
 
-  :MasonInstall rust-analyzer
   # Install Ollama (<https://ollama.com/>) and run `ollama pull llama3`
 ]]
 

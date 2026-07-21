@@ -5,26 +5,21 @@ return  {
     "neovim/nvim-lspconfig",
     "WhoIsSethDaniel/mason-tool-installer.nvim",
   },
-  opts = {
-    ensure_installed = {
-      "gopls",
-      "pyright",
-      "terraformls",
-      "bashls",
-      "rust_analyzer",
-      "ts_ls",
-      "tsserver",
-      "dockerls",
-      "docker_compose_language_service",
-      "nomicfoundation-solidity-language-server",
-    },
-  },
   config = function()
-    local mason_tool_installer = require("mason-tool-installer")
-    mason_tool_installer.setup({
+    require("mason").setup()
+    require("mason-lspconfig").setup({
       ensure_installed = {
-        "codelldb",         -- for Rust
+        "pyright",
+        "terraformls",
+        "bashls",
+        "ts_ls",
+        "dockerls",
+        "docker_compose_language_service",
+        "jdtls",
       },
+    })
+    require("mason-tool-installer").setup({
+      ensure_installed = {},
     })
   end,
 }
