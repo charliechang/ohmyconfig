@@ -46,16 +46,18 @@ popup** (`<leader>mm`).
   instead. `chafa` is run with `--passthrough none` so tmux's **native** Sixel grid stores
   and redraws the image (its default `--passthrough tmux` bypasses that and the image gets
   wiped on the next redraw).
-- **`<leader>mi` — inline ASCII toggle** (`:MermaidInlineToggle`). Opening a **markdown**
-  buffer auto-renders every ```mermaid block *in place* as ASCII: source lines are
-  concealed (`conceal_lines` extmark, needs Neovim ≥ 0.11) and the ASCII diagram is drawn
-  as virtual lines where they were. The render **stays put regardless of cursor position**
-  (it does *not* reveal source when you move into a block). To edit a block, toggle inline
-  off with `<leader>mi` — that reveals all raw source; toggle back on when done.
-  `:MermaidInlineRefresh` forces a redraw. Auto-enable is `setup({ auto = true })` in the
-  lazy spec. Rendered ASCII is cached by block source, so unchanged blocks never re-run.
-- **`<leader>ma` — ASCII float** (`:MermaidRender`). The old float view; a no-dependency
-  fallback (only needs `mermaid-ascii`, no tmux/Sixel). Good for wide diagrams.
+- **`<leader>mi` — toggle inline rendering** (markdown **and** mermaid together, see the
+  *render markdown* section below). Opening a **markdown** buffer auto-renders every
+  ```mermaid block *in place* as ASCII: source lines are concealed (`conceal_lines`
+  extmark, needs Neovim ≥ 0.11) and the ASCII diagram is drawn as virtual lines where they
+  were. The render **stays put regardless of cursor position** (it does *not* reveal source
+  when you move into a block). To edit, toggle off with `<leader>mi` — that reveals all raw
+  source (both the mermaid blocks and the markdown) — then toggle back on. Rendered ASCII is
+  cached by block source, so unchanged blocks never re-run. Mermaid-only commands still
+  exist: `:MermaidInlineToggle` / `:MermaidInlineRefresh`. Auto-enable is
+  `setup({ auto = true })` in the lazy spec.
+- **`:MermaidRender` — ASCII float** (no keymap). A no-dependency fallback (only needs
+  `mermaid-ascii`, no tmux/Sixel). Good for wide diagrams.
 
 - Implementation: `nvim/lua/core/mermaid.lua`; popup helper `nvim/scripts/mermaid-popup.sh`
 - Lazy spec:       `nvim/lua/plugins/mermaid.lua` (local plugin: `dir = stdpath("config")`)
@@ -97,8 +99,34 @@ Windows Terminal ≥ 1.22 speaks Sixel (confirmed 1.24). The working stack:
 - `mermaid-ascii` (ASCII modes) handles flowcharts/graphs and `sequenceDiagram`;
   class/gantt/state/pie are unsupported and left as **raw source** in inline mode (never
   concealed). `<br/>` in node labels shows literally. Wide diagrams may clip at the window
-  edge inline — use `<leader>mm` (PNG popup) or `<leader>ma` (float).
+  edge inline — use `<leader>mm` (PNG popup) or `:MermaidRender` (ASCII float).
 - `mmdc` (PNG popup) renders the **full** mermaid spec (colors, all diagram types).
 
 > To reproduce this whole setup (ASCII + Sixel PNG) on the Windows host **inside WSL**,
 > see [`docs/mermaid-wsl-setup.md`](docs/mermaid-wsl-setup.md).
+
+## Feature: render markdown (render-markdown.nvim)
+
+Renders markdown **in the buffer** — headings, tables, code blocks, lists, quotes, etc. —
+via [`render-markdown.nvim`](https://github.com/MeanderingProgrammer/render-markdown.nvim).
+
+- Lazy spec: `nvim/lua/plugins/render-markdown.lua` (loads on `ft = markdown`). Configured
+  with `anti_conceal = { enabled = false }` and `render_modes = true` so the render **stays
+  put regardless of cursor or mode** (no per-line auto-reveal) — matching the mermaid inline
+  behaviour. Toggle off to edit.
+- **`<leader>mi` toggles markdown *and* mermaid together.** The keymap lives in the
+  render-markdown spec and calls `nvim/lua/core/md_render.lua`, which flips both renderers
+  for the buffer in sync (mermaid inline is the source of truth for the shared on/off
+  state). Both auto-render when a markdown buffer opens.
+- Dependencies: **`nvim-treesitter` (main branch)** with the **`markdown` + `markdown_inline`
+  parsers**, and **`nvim-web-devicons`** — all already installed. The render-markdown spec
+  self-installs the parsers if missing (`require('nvim-treesitter').get_installed()` /
+  `.install()`).
+- **`tree-sitter` CLI** is required to *compile* parsers on the treesitter `main` branch
+  (the classic `:TSInstall` C-compiler path is gone). Installed under
+  `~/.local/share/tree-sitter-cli/` with `tree-sitter` symlinked into `~/.local/bin`
+  (`npm install tree-sitter-cli`). Without it, parser install fails with
+  `'tree-sitter' … no such file or directory`.
+
+> The WSL replication runbook [`docs/mermaid-wsl-setup.md`](docs/mermaid-wsl-setup.md)
+> covers this too (treesitter parsers + `tree-sitter` CLI + render-markdown).

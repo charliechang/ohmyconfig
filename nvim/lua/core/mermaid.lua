@@ -464,6 +464,24 @@ function M.enable_inline(bufnr)
   enable(bufnr)
 end
 
+-- Explicitly turn inline rendering on/off for a buffer (used by the combined
+-- markdown+mermaid toggle so both stay in sync).
+function M.set_inline(bufnr, on)
+  bufnr = bufnr or vim.api.nvim_get_current_buf()
+  if on then
+    enable(bufnr)
+  else
+    disable(bufnr)
+  end
+end
+
+-- Is inline rendering currently enabled for this buffer?
+function M.inline_enabled(bufnr)
+  bufnr = bufnr or vim.api.nvim_get_current_buf()
+  local st = state[bufnr]
+  return st ~= nil and st.enabled == true
+end
+
 function M.toggle_inline(bufnr)
   bufnr = bufnr or vim.api.nvim_get_current_buf()
   local st = state[bufnr]

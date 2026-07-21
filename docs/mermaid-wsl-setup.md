@@ -226,9 +226,9 @@ chafa -f sixels --passthrough none /tmp/t.png ; sleep 5
 nvim some-file-with-mermaid.md
 ```
 
-- **Inline ASCII**: blocks auto-render on open. `<leader>mi` toggles off (reveals raw
-  source for editing) and back on. `<leader>ma` = ASCII in a float. `<leader>mm` skips
-  ahead to the PNG view.
+- **Inline ASCII**: mermaid blocks auto-render on open. `<leader>mi` toggles rendering off
+  (reveals raw source for editing) and back on — see §9, it toggles markdown too.
+  `:MermaidRender` = ASCII in a float. `<leader>mm` = the PNG view.
 - **PNG**: cursor inside a **flowchart** block → `<leader>mm` → a new tmux window shows the
   crisp diagram; press any key to return to nvim.
 
@@ -236,7 +236,44 @@ Render log for debugging: `/tmp/mermaid-popup.log`.
 
 ---
 
-## 9. Troubleshooting (all learned the hard way)
+## 9. Markdown rendering (render-markdown.nvim)
+
+Separate from mermaid, the config renders markdown in the buffer (headings, tables, code,
+lists…) via `render-markdown.nvim`, and **`<leader>mi` toggles markdown + mermaid together**.
+lazy installs the plugin automatically; you only need the treesitter pieces:
+
+```sh
+# 1) tree-sitter CLI — REQUIRED to compile parsers on nvim-treesitter's `main`
+#    branch (there is no bundled C-compiler path anymore).
+mkdir -p ~/.local/share/tree-sitter-cli && cd ~/.local/share/tree-sitter-cli
+echo '{}' > package.json
+npm install tree-sitter-cli
+ln -sf ~/.local/share/tree-sitter-cli/node_modules/.bin/tree-sitter ~/.local/bin/tree-sitter
+tree-sitter --version
+```
+
+The `render-markdown.lua` spec self-installs the `markdown` + `markdown_inline` parsers on
+first load (`require('nvim-treesitter').install(...)`). To do it up front:
+
+```sh
+nvim --headless -c 'lua require("nvim-treesitter").install({"markdown","markdown_inline"})' -c 'sleep 60' -c qa
+# verify:
+ls ~/.local/share/nvim/site/parser/ | grep markdown     # markdown.so, markdown_inline.so
+```
+
+`nvim-treesitter` (main branch) and `nvim-web-devicons` come in as plugins; a C compiler
+(`cc`/`gcc`) must also be present for the CLI to build the parser objects.
+
+**Verify:** open a markdown file with a table → it renders as a bordered box; `<leader>mi`
+toggles the table **and** the mermaid diagrams off/on together. Rendering stays put
+regardless of the cursor (toggle off to edit).
+
+**Gotcha:** if parser install fails with `'tree-sitter' … no such file or directory`, the
+CLI (above) isn't on `PATH`.
+
+---
+
+## 10. Troubleshooting (all learned the hard way)
 
 | Symptom | Cause / fix |
 |---|---|
@@ -247,10 +284,11 @@ Render log for debugging: `/tmp/mermaid-popup.log`.
 | Inline ASCII doesn't conceal source | Neovim < 0.11 (no `conceal_lines`). Upgrade Neovim. |
 | Some blocks stay as raw source inline | `mermaid-ascii` can't render class/gantt/state/pie — expected; use `<leader>mm` (full mermaid via `mmdc`). |
 | `mmdc` errors about sandbox / Chromium | Install the libs in §6; puppeteer needs `--no-sandbox` under some WSL setups (already in `puppeteer.json`). |
+| **Markdown/tables don't render** (`<leader>mi`) | markdown treesitter parsers missing (§9). If parser install said `'tree-sitter' … no such file`, the `tree-sitter` CLI isn't on `PATH`; install it (§9) then re-open. |
 
 ---
 
-## 10. Reverting
+## 11. Reverting
 
 ```sh
 rm ~/.local/bin/tmux            # back to system tmux (3.4)
@@ -262,8 +300,10 @@ tmux kill-server && tmux        # restart
 
 ## Files involved (in this repo)
 
-- `nvim/lua/core/mermaid.lua` — all rendering logic (ASCII float, inline, PNG window).
-- `nvim/lua/plugins/mermaid.lua` — lazy spec + keymaps (`<leader>mm` / `mi` / `ma`).
+- `nvim/lua/core/mermaid.lua` — mermaid rendering (ASCII float, inline, PNG window).
+- `nvim/lua/plugins/mermaid.lua` — mermaid lazy spec + `<leader>mm` keymap.
 - `nvim/scripts/mermaid-popup.sh` — the `mmdc` → `chafa` Sixel render script.
+- `nvim/lua/plugins/render-markdown.lua` — markdown rendering + `<leader>mi` combined toggle.
+- `nvim/lua/core/md_render.lua` — flips markdown + mermaid rendering together.
 - `.tmux.conf` — `set -ag terminal-features ",*:sixel"`.
 - `CLAUDE.md` — the dev-server-side notes this doc parallels.

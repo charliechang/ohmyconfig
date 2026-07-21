@@ -7,8 +7,9 @@ return {
   lazy = false,
   keys = {
     { "<leader>mm", "<cmd>MermaidPopup<CR>", desc = "Render mermaid diagram as PNG (Sixel) in a tmux popup" },
-    { "<leader>mi", "<cmd>MermaidInlineToggle<CR>", desc = "Toggle inline mermaid ASCII rendering" },
-    { "<leader>ma", "<cmd>MermaidRender<CR>", desc = "Render mermaid diagram as ASCII (float)" },
+    -- <leader>mi (toggle inline mermaid + markdown rendering) is defined in
+    -- plugins/render-markdown.lua so it can flip both renderers together.
+    -- :MermaidRender (ASCII float) remains available as a command.
   },
   config = function()
     -- auto = true: markdown buffers render their mermaid blocks in place on open.
