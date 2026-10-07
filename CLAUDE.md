@@ -130,3 +130,29 @@ via [`render-markdown.nvim`](https://github.com/MeanderingProgrammer/render-mark
 
 > The WSL replication runbook [`docs/mermaid-wsl-setup.md`](docs/mermaid-wsl-setup.md)
 > covers this too (treesitter parsers + `tree-sitter` CLI + render-markdown).
+
+## Feature: herdr-style agent status in tmux
+
+Mimics [herdr](https://github.com/herdrdev/herdr)'s "never hunt for the stuck one": every
+tmux pane running Claude Code is tagged with a pane option `@agent_state`, driven by
+**Claude Code hooks** (not screen-scraping):
+
+| state | set by | badge |
+|---|---|---|
+| `working` | `UserPromptSubmit` / `PreToolUse` / `PostToolUse` | `●` |
+| `blocked` | `Notification` (`permission_prompt`, `elicitation_dialog`) | red `!` |
+| `done` (finished, unseen) | `Stop` while the pane is not on screen | `✓` |
+| `idle` (finished, seen) | `Stop` while visible, or focusing a `done` pane | `·` |
+| *(unset)* | `SessionEnd` | — |
+
+- Window name shows the **most urgent** pane state in that window (blocked > done >
+  working > idle, via `#{P:…}` pane loop); `status-right` shows counts across all
+  sessions (`!1 ✓2 ●3`). A tmux message pops when an off-screen agent blocks or finishes.
+- **`prefix a`** jumps to the next agent needing attention (blocked first, then done;
+  cycles across sessions). **`prefix A`** = `choose-tree` filtered to agent windows.
+- Stale state (agent killed without `SessionEnd`) is dropped once the pane no longer runs
+  `claude`/`node`.
+- Files: `tmux/agent-state.sh` (logic), `.tmux.conf` (*herdr-style agent status* block).
+- **Install per machine:** `tmux/install-agent-state.sh` — symlinks the script to
+  `~/.local/bin/tmux-agent-state`, merges the hooks into `~/.claude/settings.json`
+  (idempotent, keeps other hooks, writes `settings.json.bak`), and reloads tmux.
