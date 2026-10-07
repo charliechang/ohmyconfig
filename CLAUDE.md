@@ -142,7 +142,7 @@ tmux pane running Claude Code is tagged with a pane option `@agent_state`, drive
 | `working` | `UserPromptSubmit` / `PreToolUse` / `PostToolUse` | `●` |
 | `blocked` | `Notification` (`permission_prompt`, `elicitation_dialog`) | red `!` |
 | `done` (finished, unseen) | `Stop` while the pane is not on screen | `✓` |
-| `idle` (finished, seen) | `Stop` while visible, or focusing a `done` pane | `·` |
+| `idle` (finished, seen) | `Stop` while visible, or focusing a `done` pane | `○` |
 | *(unset)* | `SessionEnd` | — |
 
 - Window name shows the **most urgent** pane state in that window (blocked > done >
@@ -150,8 +150,10 @@ tmux pane running Claude Code is tagged with a pane option `@agent_state`, drive
   sessions (`!1 ✓2 ●3`). A tmux message pops when an off-screen agent blocks or finishes.
 - **`prefix a`** jumps to the next agent needing attention (blocked first, then done;
   cycles across sessions). **`prefix A`** = `choose-tree` filtered to agent windows.
-- Stale state (agent killed without `SessionEnd`) is dropped once the pane no longer runs
-  `claude`/`node`.
+- Claude running inside nvim's `:terminal` works too: it inherits nvim's `$TMUX_PANE`, so the
+  nvim pane gets the badge. A pane running `claude` with no state yet shows `idle`; stale
+  state (agent killed without `SessionEnd`) is dropped once
+  no `claude` process is left in the pane's process tree.
 - Files: `tmux/agent-state.sh` (logic), `.tmux.conf` (*herdr-style agent status* block).
 - **Install per machine:** `tmux/install-agent-state.sh` — symlinks the script to
   `~/.local/bin/tmux-agent-state`, merges the hooks into `~/.claude/settings.json`

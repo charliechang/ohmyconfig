@@ -62,16 +62,32 @@ cmd_seen() {
   refresh
 }
 
+# PIDs of every claude process and all its ancestors, one per line. A pane is an
+# agent pane when its pane_pid is in this set, so Claude running inside nvim's
+# :terminal (pane runs zsh -> nvim -> claude) counts too.
+claude_ancestors() {
+  ps -e -o pid=,ppid=,comm= 2>/dev/null | awk '
+    { parent[$1] = $2; if ($3 == "claude") agent[$1] = 1 }
+    END { for (p in agent) for (q = p; q > 1; q = parent[q]) print q }'
+}
+
 # All agent panes as "<pane_id> <state>". Drops stale state on panes whose
-# agent exited without a SessionEnd hook (e.g. killed).
+# agent exited without a SessionEnd hook (e.g. killed), and marks untagged
+# panes running claude as idle (fresh session, or started before the hooks).
 agent_panes() {
-  "$TMUX_BIN" list-panes -a -F '#{pane_id} #{@agent_state} #{pane_current_command}' 2>/dev/null |
-    while read -r id state cmd; do
-      [ -n "$cmd" ] || continue # no state set: the line is "<id>  <cmd>"
-      case $cmd in
-        claude|node) echo "$id $state" ;;
-        *) "$TMUX_BIN" set -pu -t "$id" @agent_state 2>/dev/null ;;
-      esac
+  local live
+  live=" $(claude_ancestors | tr '\n' ' ') "
+  "$TMUX_BIN" list-panes -a -F '#{pane_id} #{pane_pid} #{@agent_state}' 2>/dev/null |
+    while read -r id pid state; do
+      if [[ $live == *" $pid "* ]]; then
+        if [ -z "$state" ]; then
+          state=idle
+          "$TMUX_BIN" set -p -t "$id" @agent_state idle 2>/dev/null
+        fi
+        echo "$id $state"
+      elif [ -n "$state" ]; then
+        "$TMUX_BIN" set -pu -t "$id" @agent_state 2>/dev/null
+      fi
     done
 }
 
