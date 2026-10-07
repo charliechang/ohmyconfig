@@ -84,9 +84,9 @@ cmd_summary() {
       working) w=$((w + 1)) ;;
     esac
   done < <(agent_panes)
-  [ $b -gt 0 ] && out+="#[fg=red,bold]!$b#[default] "
-  [ $d -gt 0 ] && out+="#[fg=colour22,bold]✓$d#[default] "
-  [ $w -gt 0 ] && out+="#[fg=colour94]●$w#[default] "
+  [ $b -gt 0 ] && out+="#[fg=white,bg=red,bold] !$b #[default] "
+  [ $d -gt 0 ] && out+="#[fg=white,bg=colour25,bold] ✓$d #[default] "
+  [ $w -gt 0 ] && out+="#[fg=black,bg=colour220] ●$w #[default] "
   printf '%s' "$out"
 }
 
