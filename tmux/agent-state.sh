@@ -64,10 +64,12 @@ cmd_seen() {
 
 # PIDs of every claude process and all its ancestors, one per line. A pane is an
 # agent pane when its pane_pid is in this set, so Claude running inside nvim's
-# :terminal (pane runs zsh -> nvim -> claude) counts too.
+# :terminal (pane runs zsh -> nvim -> claude) counts too. comm is the bare name
+# on Linux but the invoked path on macOS (e.g. /Users/x/.local/bin/claude when
+# nvim launches it), so match on the basename.
 claude_ancestors() {
   ps -e -o pid=,ppid=,comm= 2>/dev/null | awk '
-    { parent[$1] = $2; if ($3 == "claude") agent[$1] = 1 }
+    { parent[$1] = $2; n = $3; sub(/.*\//, "", n); if (n == "claude") agent[$1] = 1 }
     END { for (p in agent) for (q = p; q > 1; q = parent[q]) print q }'
 }
 

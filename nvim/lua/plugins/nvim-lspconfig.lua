@@ -52,6 +52,12 @@ return {
       capabilities = capabilities,
     })
 
+    vim.lsp.config("rust_analyzer", {
+      capabilities = capabilities,
+      filetypes = {"rust"},
+      root_markers = {"Cargo.toml"},
+    })
+
     vim.lsp.config("ts_ls", {
       capabilities = capabilities,
     })
@@ -75,6 +81,12 @@ return {
       "dockerls",
       "docker_compose_language_service",
     })
+
+    -- rust-analyzer comes from rustup (~/.cargo/bin), not Mason; only enable it
+    -- on machines that have it (the Mac does, the dev-server doesn't).
+    if vim.fn.executable("rust-analyzer") == 1 then
+      vim.lsp.enable("rust_analyzer")
+    end
 
     -- Terraform format on save
     vim.api.nvim_create_autocmd({"BufWritePre"}, {

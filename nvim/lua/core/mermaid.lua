@@ -365,6 +365,11 @@ local function refresh(bufnr)
   if not (st and st.enabled) or not vim.api.nvim_buf_is_valid(bufnr) then
     return
   end
+  -- No binary: render nothing, and don't let run_ascii's nil poison ascii_cache
+  -- (blocks would stay raw even after mermaid-ascii gets installed).
+  if not binary() then
+    return
+  end
 
   vim.api.nvim_buf_clear_namespace(bufnr, ns, 0, -1)
   st.gen = (st.gen or 0) + 1
@@ -428,18 +433,25 @@ local function ensure_conceal()
   end
 end
 
-local function enable(bufnr)
+-- quiet: skip the missing-binary warning. Used by the automatic paths
+-- (markdown open, the md_render toggle) so machines without mermaid-ascii
+-- (e.g. the Mac) aren't warned on every markdown file.
+local function enable(bufnr, quiet)
   bufnr = bufnr or vim.api.nvim_get_current_buf()
-  if not binary() then
-    vim.notify(
-      "mermaid-ascii not found; inline rendering disabled. Install: "
-        .. "CGO_ENABLED=0 go install github.com/AlexanderGrooff/mermaid-ascii@latest",
-      vim.log.levels.WARN
-    )
-    return
-  end
+  -- Record "on" even without the binary: md_render.lua keeps render-markdown
+  -- in sync off this state, so <leader>mi must still flip.
   state[bufnr] = state[bufnr] or {}
   state[bufnr].enabled = true
+  if not binary() then
+    if not quiet then
+      vim.notify(
+        "mermaid-ascii not found; mermaid blocks stay as source. Install: "
+          .. "CGO_ENABLED=0 go install github.com/AlexanderGrooff/mermaid-ascii@latest",
+        vim.log.levels.WARN
+      )
+    end
+    return
+  end
   ensure_conceal()
   refresh(bufnr)
 end
@@ -469,7 +481,7 @@ end
 function M.set_inline(bufnr, on)
   bufnr = bufnr or vim.api.nvim_get_current_buf()
   if on then
-    enable(bufnr)
+    enable(bufnr, true)
   else
     disable(bufnr)
   end
@@ -527,7 +539,7 @@ function M.setup(opts)
       pattern = "markdown",
       callback = function(ev)
         ensure_conceal()
-        enable(ev.buf)
+        enable(ev.buf, true)
       end,
     })
   end
@@ -566,7 +578,7 @@ function M.setup(opts)
     local buf = vim.api.nvim_get_current_buf()
     if vim.bo[buf].filetype == "markdown" then
       ensure_conceal()
-      enable(buf)
+      enable(buf, true)
     end
   end
 end

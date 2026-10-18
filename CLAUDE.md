@@ -9,6 +9,36 @@ The author works from **Windows → WSL → ssh → dev-server**. Neovim and tmu
 **dev-server**; edits are made there over ssh. A Claude session running in WSL sees the
 repo via git (clone/pull), not the live editor.
 
+The same config is also pulled onto a **Mac** (`~/.config/nvim` and `~/.tmux.conf`
+symlink into `~/work/ohmyconfig`). Keep machine-specific bits conditional rather than
+replacing them:
+
+- `.tmux.conf` picks shell + clipboard with `if-shell 'uname | grep -q Darwin'`
+  (Mac: `reattach-to-user-namespace` + pbcopy/pbpaste; Linux: `/usr/bin/zsh`).
+- Tools only some machines have are guarded at runtime: `rust_analyzer` is enabled only
+  if `rust-analyzer` is on PATH; mermaid inline rendering stays silent without
+  `mermaid-ascii`; render-markdown only builds parsers when the `tree-sitter` CLI exists.
+
+### New machine checklist (do this right after the first clone / pull)
+
+The guards above mean a missing tool fails **silently**, so install these up front:
+
+1. **`tmux/install-agent-state.sh`** — run it **before** reloading tmux. Otherwise the
+   agent-status hooks call a missing `~/.local/bin/tmux-agent-state` and every pane switch
+   drops the pane into view-mode with a `returned 127` error.
+2. **`mermaid-ascii` on PATH** — without it mermaid blocks just stay as source (no warning
+   on open). Linux: `go install` (see *Dependencies* below). Mac (no Go needed):
+   ```sh
+   gh release download -R AlexanderGrooff/mermaid-ascii -p 'mermaid-ascii_Darwin_arm64.tar.gz' -D /tmp/ma \
+     && tar -xzf /tmp/ma/mermaid-ascii_Darwin_arm64.tar.gz -C /tmp/ma \
+     && install -m 755 /tmp/ma/mermaid-ascii ~/.local/bin/ && rm -rf /tmp/ma
+   ```
+3. **Neovim:** `:Lazy sync`, then **restart** nvim (lsp/mason/mermaid config only runs at
+   startup). The first start makes Mason download the LSP servers.
+4. Optional, per machine: `tree-sitter` CLI (only to build parsers; Neovim's bundled
+   markdown parsers are used without it), `rust-analyzer` via rustup, Java 21 for `jdtls`,
+   and `mmdc` + `chafa` + a Sixel terminal for `<leader>mm`.
+
 ## IMPORTANT: two checkouts exist on the dev-server
 
 There are two clones of this repo on the dev-server, and they have **diverged** (different
@@ -70,6 +100,9 @@ popup** (`<leader>mm`).
   CGO_ENABLED=0 GOBIN=$HOME/go/bin go install github.com/AlexanderGrooff/mermaid-ascii@latest
   ```
   (`CGO_ENABLED=0` avoids the pixi Go toolchain's missing C compiler on this box.)
+  On the Mac (no Go) use the prebuilt release binary — see the *New machine checklist*.
+  The Mac's Ghostty terminal has no Sixel, so `<leader>mm` doesn't work there — use
+  inline or `:MermaidRender`.
 - **PNG popup**: `mmdc` (`@mermaid-js/mermaid-cli`), `chafa`, and a Sixel tmux + terminal.
   On the dev-server these are already set up (see next section).
 

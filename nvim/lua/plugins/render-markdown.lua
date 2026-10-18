@@ -27,12 +27,16 @@ return {
   config = function(_, opts)
     -- Ensure the markdown treesitter parsers exist (nvim-treesitter main branch
     -- API). Without them render-markdown silently renders nothing.
+    -- Without the `tree-sitter` CLI (needed to build parsers on main, absent on
+    -- the Mac) an install can only fail, so settle for Neovim's bundled parsers.
     local ok, ts = pcall(require, "nvim-treesitter")
     if ok then
       local installed = ts.get_installed()
+      local can_build = vim.fn.executable("tree-sitter") == 1
       local need = {}
       for _, lang in ipairs({ "markdown", "markdown_inline" }) do
-        if not vim.list_contains(installed, lang) then
+        if not vim.list_contains(installed, lang)
+          and (can_build or not vim.treesitter.language.add(lang)) then
           need[#need + 1] = lang
         end
       end
