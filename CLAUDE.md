@@ -15,9 +15,11 @@ replacing them:
 
 - `.tmux.conf` picks shell + clipboard with `if-shell 'uname | grep -q Darwin'`
   (Mac: `reattach-to-user-namespace` + pbcopy/pbpaste; Linux: `/usr/bin/zsh`).
-- Tools only some machines have are guarded at runtime: `rust_analyzer` is enabled only
-  if `rust-analyzer` is on PATH; mermaid inline rendering stays silent without
-  `mermaid-ascii`; render-markdown only builds parsers when the `tree-sitter` CLI exists.
+- Tools only some machines have are guarded at runtime: mermaid inline rendering stays
+  silent without `mermaid-ascii`; render-markdown only builds parsers when the
+  `tree-sitter` CLI exists.
+- Neovim **0.12+** is required on every machine: the pinned nvim-treesitter (`main`)
+  refuses older versions (`:checkhealth nvim-treesitter`). Mac: `brew upgrade neovim`.
 
 ### New machine checklist (do this right after the first clone / pull)
 
@@ -36,7 +38,7 @@ The guards above mean a missing tool fails **silently**, so install these up fro
 3. **Neovim:** `:Lazy sync`, then **restart** nvim (lsp/mason/mermaid config only runs at
    startup). The first start makes Mason download the LSP servers.
 4. Optional, per machine: `tree-sitter` CLI (only to build parsers; Neovim's bundled
-   markdown parsers are used without it), `rust-analyzer` via rustup, Java 21 for `jdtls`,
+   markdown parsers are used without it), Java 21 for `jdtls`,
    and `mmdc` + `chafa` + a Sixel terminal for `<leader>mm`.
 
 ## IMPORTANT: two checkouts exist on the dev-server
