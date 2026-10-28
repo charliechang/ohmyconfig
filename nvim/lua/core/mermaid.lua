@@ -6,7 +6,8 @@
 --
 -- Ways to view a diagram:
 --   <leader>mm       -- render the ```mermaid block under the cursor as a real
---                       PNG (mermaid-cli) shown as a Sixel image in a tmux popup
+--                       image (Pele SVG, or mermaid-cli PNG as a fallback) shown
+--                       as a Sixel image in a tmux popup
 --                       (:MermaidPopup). Needs a Sixel-capable tmux + terminal.
 --   :MermaidRender   -- same block rendered as ASCII art in a float (no popup /
 --                       tmux needed). A no-dependency fallback.
@@ -206,10 +207,10 @@ function M.render()
 end
 
 --------------------------------------------------------------------------------
--- Popup renderer (real PNG -> Sixel, in a tmux popup)
+-- Popup renderer (real image -> Sixel, in a tmux popup)
 --------------------------------------------------------------------------------
 
--- Public: render the mermaid block near the cursor to a PNG and show it as a
+-- Public: render the mermaid block near the cursor to an image and show it as a
 -- Sixel image in a temporary tmux window. Requires a Sixel-capable tmux +
 -- terminal. A tmux *window* (real pane) is used rather than display-popup,
 -- because popup overlays do not composite Sixel images -- only panes do.
@@ -221,7 +222,9 @@ function M.render_popup()
     )
     return
   end
-  for _, exe in ipairs({ "tmux", "mmdc", "chafa" }) do
+  -- The renderer (pele via node, or mmdc) is resolved by mermaid-popup.sh, which
+  -- also finds nvm's node; it reports a missing one in the popup.
+  for _, exe in ipairs({ "tmux", "chafa" }) do
     if vim.fn.executable(exe) == 0 then
       vim.notify("mermaid popup: '" .. exe .. "' not found on $PATH.", vim.log.levels.ERROR)
       return

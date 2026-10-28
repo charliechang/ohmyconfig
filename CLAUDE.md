@@ -39,7 +39,8 @@ The guards above mean a missing tool fails **silently**, so install these up fro
    startup). The first start makes Mason download the LSP servers.
 4. Optional, per machine: `tree-sitter` CLI (only to build parsers; Neovim's bundled
    markdown parsers are used without it), Java 21 for `jdtls`,
-   and `mmdc` + `chafa` + a Sixel terminal for `<leader>mm`.
+   and pele (`~/.local/share/pele`) + `chafa` + a Sixel terminal for `<leader>mm`
+   (`mmdc` only as a fallback).
 
 ## IMPORTANT: two checkouts exist on the dev-server
 
@@ -63,15 +64,21 @@ Before editing nvim config, confirm the tree: `readlink -f ~/.config/nvim`.
 ## Feature: render mermaid diagrams
 
 Renders ` ```mermaid ` fenced blocks (and whole `.mmd` / `.mermaid` files) two ways:
-**inline ASCII** (always available) and a **real PNG shown as a Sixel image in a tmux
+**inline ASCII** (always available) and a **real image shown as a Sixel image in a tmux
 popup** (`<leader>mm`).
 
 ### View modes / keymaps
 
-- **`<leader>mm` — PNG in a tmux window** (`:MermaidPopup`). The block under the cursor
-  is rendered to a real PNG by `mermaid-cli` (`mmdc`) and displayed as a **Sixel** image
-  in a temporary tmux **window**; press any key to close it and return to Neovim. This is
-  the high-fidelity view (real mermaid, colors, readable labels). Needs a Sixel-capable
+- **`<leader>mm` — image in a tmux window** (`:MermaidPopup`). The block under the cursor
+  is rendered to SVG by [Pele](https://pele.run) (`nvim/scripts/pele-render.mjs`, plain
+  Node, no browser, ~0.2s, all Mermaid 12.1 diagram types) and displayed as a **Sixel**
+  image in a temporary tmux **window**; press any key to close it and return to Neovim.
+  If Pele isn't installed or rejects the diagram, `mermaid-cli` (`mmdc`, headless Chrome,
+  ~1–2s) is tried instead; when both fail Pele's parse error is shown. Pele uses its own
+  layout and neutral style, not Mermaid's. `pele-render.mjs` inlines Pele's CSS `var()`
+  colors because chafa's SVG loader (librsvg) ignores them and would draw a blank image.
+  Pele has **no ASCII output** (out of scope upstream), so inline stays on
+  `mermaid-ascii`. Needs a Sixel-capable
   tmux **and** terminal (see setup below). Two gotchas learned the hard way: (1) the image
   can't render *inline in the buffer* — Neovim redraws its grid over any Sixel; and (2) a
   `tmux display-popup` overlay does **not** composite Sixel, so a real window/pane is used
@@ -92,6 +99,7 @@ popup** (`<leader>mm`).
   `mermaid-ascii`, no tmux/Sixel). Good for wide diagrams.
 
 - Implementation: `nvim/lua/core/mermaid.lua`; popup helper `nvim/scripts/mermaid-popup.sh`
+  (renderer `nvim/scripts/pele-render.mjs`; log `/tmp/mermaid-popup.log` says which ran)
 - Lazy spec:       `nvim/lua/plugins/mermaid.lua` (local plugin: `dir = stdpath("config")`)
 
 ### Dependencies
@@ -105,10 +113,12 @@ popup** (`<leader>mm`).
   On the Mac (no Go) use the prebuilt release binary — see the *New machine checklist*.
   The Mac's Ghostty terminal has no Sixel, so `<leader>mm` doesn't work there — use
   inline or `:MermaidRender`.
-- **PNG popup**: `mmdc` (`@mermaid-js/mermaid-cli`), `chafa`, and a Sixel tmux + terminal.
-  On the dev-server these are already set up (see next section).
+- **Image popup**: `chafa` with the SVG loader (`chafa --version` lists `SVG`), Node ≥ 20 +
+  **pele** in `~/.local/share/pele` (`npm install pele@1` there; override with `PELE_DIR`),
+  and a Sixel tmux + terminal. Optional fallback: `mmdc` (`@mermaid-js/mermaid-cli`).
+  The popup finds node on `~/.local/bin`, pixi, or the newest nvm version.
 
-### Sixel PNG setup (dev-server)
+### Sixel image setup (dev-server)
 
 The stock `tmux 3.4` (apt) is **not** built with Sixel, so images can't pass through it.
 Windows Terminal ≥ 1.22 speaks Sixel (confirmed 1.24). The working stack:
@@ -119,10 +129,11 @@ Windows Terminal ≥ 1.22 speaks Sixel (confirmed 1.24). The working stack:
   `tmux -u` alias resolves through it. Revert = delete the wrapper (falls back to
   `/usr/bin/tmux` 3.4).
 - **`.tmux.conf`**: `set -ag terminal-features ",*:sixel"` advertises Sixel to apps.
-- **mermaid-cli**: installed under `~/.local/share/mermaid-cli/`, `mmdc` symlinked into
+- **pele**: `npm install pele@1` in `~/.local/share/pele/` (pixi node). The renderer.
+- **mermaid-cli** (fallback only): installed under `~/.local/share/mermaid-cli/`, `mmdc` symlinked into
   `~/.local/bin`. Uses system `/usr/bin/google-chrome` via
   `~/.config/mermaid/puppeteer.json` (no bundled Chromium download).
-- **chafa**: `apt install chafa` (encodes PNG → Sixel; `mermaid-popup.sh` runs
+- **chafa**: `apt install chafa` (encodes SVG/PNG → Sixel; `mermaid-popup.sh` runs
   `chafa -f sixels`).
 - A binary swap needs the tmux **server restarted** to take effect (`/usr/bin/tmux
   kill-server`, then start `tmux`; verify `tmux -V` → 3.7b). Sixel test in a pane:
@@ -135,7 +146,8 @@ Windows Terminal ≥ 1.22 speaks Sixel (confirmed 1.24). The working stack:
   class/gantt/state/pie are unsupported and left as **raw source** in inline mode (never
   concealed). `<br/>` in node labels shows literally. Wide diagrams may clip at the window
   edge inline — use `<leader>mm` (PNG popup) or `:MermaidRender` (ASCII float).
-- `mmdc` (PNG popup) renders the **full** mermaid spec (colors, all diagram types).
+- The image popup (Pele) renders **every** diagram type; label widths are estimated from
+  built-in font metrics, so text can sit tight against a box edge.
 
 > To reproduce this whole setup (ASCII + Sixel PNG) on the Windows host **inside WSL**,
 > see [`docs/mermaid-wsl-setup.md`](docs/mermaid-wsl-setup.md).
