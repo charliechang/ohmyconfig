@@ -242,7 +242,9 @@ tmux pane running Claude Code is tagged with a pane option `@agent_state`, drive
   starts the server at boot so the layout is already back when you ssh in: run
   `tmux a`, not `tmux` (plain `tmux` adds a new session). `ExecStop` saves once
   more at shutdown. WSL skips the unit (it only boots when a terminal opens, and the
-  unit's env would lack the Windows PATH); there the first `tmux` restores.
+  unit's env would lack the Windows PATH); there the first `tmux` restores. Same on the
+  **Mac** (no systemd; the installer skips the unit): the first `tmux` after a reboot
+  restores.
 - **Install per machine:** `tmux/install-resurrect.sh` clones pinned plugins
   (resurrect v4.0.0, continuum v3.1.0) into `~/.tmux/plugins`, links
   `~/.local/bin/tmux-resurrect-extras`, links + enables the unit where it applies,
@@ -253,4 +255,7 @@ tmux pane running Claude Code is tagged with a pane option `@agent_state`, drive
   plugin's `eval` tilde-expands `~bin` to `/bin`); (2) continuum's restore runs
   *while the config loads*, before the unit's `_boot` session exists, so the unit
   drops `_boot` in `ExecStartPost`, not in a resurrect hook; (3) continuum
-  auto-saves only when it is the sole tmux server on the machine.
+  auto-saves only when it is the sole tmux server on the machine; (4) on macOS a pane
+  running native Claude reports `pane_current_command` as its version file name
+  (`2.1.321`, the target of `~/.local/bin/claude`), so `resurrect-extras.sh save` maps
+  version-shaped names to `claude`.

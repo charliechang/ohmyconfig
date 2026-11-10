@@ -66,6 +66,9 @@ cmd_save() {
         for (i = 1; i <= n; i++) if (split(rows[i], f, " ") == 2) cur[f[1]] = cur[f[1]] " " f[2]
       }
       {
+        # Native Claude runs as ~/.local/share/claude/versions/<version>, and
+        # macOS reports that file name (e.g. 2.1.321) as pane_current_command.
+        if ($5 ~ /^[0-9]+\.[0-9]+\.[0-9]+$/) $5 = "claude"
         ids = $6
         m = split(cur[$1], add, " ")
         for (i = 1; i <= m; i++) {
