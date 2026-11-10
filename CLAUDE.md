@@ -226,8 +226,10 @@ tmux pane running Claude Code is tagged with a pane option `@agent_state`, drive
     foreground command, builds and one-off scripts included.)
   - **Claude Code** panes run `claude --resume <id>` with their own conversation. The
     agent-state hooks keep each pane's session ids in `@claude_sessions` (SessionStart
-    adds, SessionEnd removes); `tmux/resurrect-extras.sh` saves them to
-    `claude-panes.tsv` beside the resurrect save and resumes them (cd'ing to the
+    adds, SessionEnd removes); on each save `tmux/resurrect-extras.sh` also reads
+    every live Claude's current id and pane from `~/.claude/sessions/<pid>.json`
+    (so sessions no hook has reported are covered too), writes them to
+    `claude-panes.tsv` beside the resurrect save, and resumes them (cd'ing to the
     transcript's `cwd`).
   - **nvim** reloads its own session (buffers, splits, tabs, cursor) and reopens
     Claude via `:ClaudeCode --resume <id>` if it was running inside.
@@ -245,8 +247,7 @@ tmux pane running Claude Code is tagged with a pane option `@agent_state`, drive
   (resurrect v4.0.0, continuum v3.1.0) into `~/.tmux/plugins`, links
   `~/.local/bin/tmux-resurrect-extras`, links + enables the unit where it applies,
   and reloads tmux. `.tmux.conf` skips the plugins if absent. Rerun
-  `tmux/install-agent-state.sh` too (adds the SessionStart hook). A Claude session
-  is known once any hook fires in it, so running ones are picked up as they work.
+  `tmux/install-agent-state.sh` too (adds the SessionStart hook).
 - Gotchas: (1) the saved command is the full path (`~/.pixi/envs/nvim/bin/nvim`),
   so the process list uses quoted `"~bin/nvim"` substring patterns (unquoted, the
   plugin's `eval` tilde-expands `~bin` to `/bin`); (2) continuum's restore runs

@@ -33,11 +33,48 @@ session_cwd() {
   [ -n "$f" ] && grep -m1 -o '"cwd":"[^"]*"' "$f" | sed 's/"cwd":"\(.*\)"/\1/'
 }
 
+# "<pane_id> <session_id>" for every live Claude process. Claude writes
+# ~/.claude/sessions/<pid>.json with its current sessionId and its tmux pane
+# ("tmux":"0:@1.%2"; inside nvim that is nvim's pane). This catches sessions
+# no hook has reported yet, e.g. ones started before the hooks were installed.
+live_sessions() {
+  local f pid json id pane
+  for f in ~/.claude/sessions/*.json; do
+    [ -f "$f" ] || continue
+    pid=${f##*/}
+    pid=${pid%.json}
+    case $(ps -p "$pid" -o comm= 2>/dev/null) in
+      claude | */claude) ;;
+      *) continue ;; # stale file, process gone (or pid reused)
+    esac
+    json=$(<"$f")
+    id=$(printf '%s' "$json" | sed -n 's/.*"sessionId" *: *"\([^"]*\)".*/\1/p')
+    pane=$(printf '%s' "$json" | sed -n 's/.*"tmux" *: *"[^"]*\.\(%[0-9]*\)".*/\1/p')
+    [ -n "$id" ] && [ -n "$pane" ] && echo "$pane $id"
+  done
+}
+
 cmd_save() {
   # session<TAB>window<TAB>pane<TAB>command<TAB>ids (space-separated, newest last)
+  # ids = what the hooks recorded (@claude_sessions) plus each live Claude's
+  # current session, which goes last so it is the one resumed.
   "$TMUX_BIN" list-panes -a -F \
-    '#{session_name}	#{window_index}	#{pane_index}	#{pane_current_command}	#{@claude_sessions}' |
-    awk -F'\t' '$5 != ""' >"$tsv.tmp" && mv "$tsv.tmp" "$tsv"
+    '#{pane_id}	#{session_name}	#{window_index}	#{pane_index}	#{pane_current_command}	#{@claude_sessions}' |
+    LIVE="$(live_sessions)" awk -F'\t' -v OFS='\t' '
+      BEGIN {
+        n = split(ENVIRON["LIVE"], rows, "\n")
+        for (i = 1; i <= n; i++) if (split(rows[i], f, " ") == 2) cur[f[1]] = cur[f[1]] " " f[2]
+      }
+      {
+        ids = $6
+        m = split(cur[$1], add, " ")
+        for (i = 1; i <= m; i++) {
+          gsub("(^| )" add[i] "( |$)", " ", ids)
+          ids = ids " " add[i]
+        }
+        gsub(/^ +| +$/, "", ids); gsub(/  +/, " ", ids)
+        if (ids != "") print $2, $3, $4, $5, ids
+      }' >"$tsv.tmp" && mv "$tsv.tmp" "$tsv"
 }
 
 cmd_markers() {
