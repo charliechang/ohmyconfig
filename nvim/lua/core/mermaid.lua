@@ -46,6 +46,21 @@ local function is_close_fence(line)
   return line:match("^%s*```+%s*$") ~= nil or line:match("^%s*~~~+%s*$") ~= nil
 end
 
+-- mermaid-ascii rejects a whole sequence diagram on syntax it doesn't know.
+-- Rewrite the common cases to the closest thing it draws: `actor X` becomes a
+-- participant box, and lost-message arrows `-x` / `--x` become `->>` / `-->>`.
+local function compat(source)
+  if not source:match("^%s*sequenceDiagram") then
+    return source
+  end
+  local lines = vim.split(source, "\n", { plain = true })
+  for i, line in ipairs(lines) do
+    line = line:gsub("^(%s*)actor(%s)", "%1participant%2")
+    lines[i] = line:gsub("(%S)(%-%-?)x(%s*[%+%-]?%s*[%w_])", "%1%2>>%3")
+  end
+  return table.concat(lines, "\n")
+end
+
 -- Run mermaid-ascii on `source` (a string) and return the ASCII lines, or
 -- nil on failure / unsupported diagram. Callback style; runs `cb(lines|nil)`
 -- on the main loop.
@@ -55,7 +70,7 @@ local function run_ascii(source, cb)
     cb(nil)
     return
   end
-  vim.system({ bin, "-f", "-" }, { stdin = source, text = true }, function(res)
+  vim.system({ bin, "-f", "-" }, { stdin = compat(source), text = true }, function(res)
     vim.schedule(function()
       if res.code ~= 0 then
         cb(nil)
