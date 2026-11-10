@@ -35,6 +35,8 @@ The guards above mean a missing tool fails **silently**, so install these up fro
      && tar -xzf /tmp/ma/mermaid-ascii_Darwin_arm64.tar.gz -C /tmp/ma \
      && install -m 755 /tmp/ma/mermaid-ascii ~/.local/bin/ && rm -rf /tmp/ma
    ```
+2b. **`tmux/install-resurrect.sh`** — tmux sessions survive reboots (see *Feature:
+   tmux survives reboots*). github.com blocked? Prefix `ALL_PROXY=socks5h://localhost:1080`.
 3. **Neovim:** `:Lazy sync`, then **restart** nvim (lsp/mason/mermaid config only runs at
    startup). The first start makes Mason download the LSP servers.
 4. Optional, per machine: `tree-sitter` CLI (only to build parsers; Neovim's bundled
@@ -146,7 +148,10 @@ Windows Terminal ≥ 1.22 speaks Sixel (confirmed 1.24). The working stack:
 
 - `mermaid-ascii` (ASCII modes) handles flowcharts/graphs and `sequenceDiagram`;
   class/gantt/state/pie are unsupported and left as **raw source** in inline mode (never
-  concealed). `<br/>` in node labels shows literally. Wide diagrams may clip at the window
+  concealed). In sequence diagrams `actor` and lost-message arrows (`-x`, `--x`) are
+  rewritten before rendering (`compat()` in `mermaid.lua`) because mermaid-ascii rejects
+  the whole block on them; they draw as a participant box and a normal arrow.
+  `<br/>` in node labels shows literally. Wide diagrams may clip at the window
   edge inline — use `<leader>mm` (PNG popup) or `:MermaidRender` (ASCII float).
 - The image popup (Pele) renders **every** diagram type; label widths are estimated from
   built-in font metrics, so text can sit tight against a box edge.
@@ -207,3 +212,27 @@ tmux pane running Claude Code is tagged with a pane option `@agent_state`, drive
 - **Install per machine:** `tmux/install-agent-state.sh` — symlinks the script to
   `~/.local/bin/tmux-agent-state`, merges the hooks into `~/.claude/settings.json`
   (idempotent, keeps other hooks, writes `settings.json.bak`), and reloads tmux.
+
+## Feature: tmux survives reboots (tmux-resurrect + tmux-continuum)
+
+- **Save:** tmux-continuum saves every session/window/split/cwd (plus pane text)
+  every 5 min; `prefix C-s` saves now, `prefix C-r` restores by hand. Saves live in
+  `~/.tmux/resurrect/`.
+- **Restore:** continuum restores the last save whenever a fresh tmux server starts.
+  nvim/vim (and resurrect's default list: less, man, top, ...) are relaunched with
+  their arguments; anything else, Claude Code included, comes back as a shell in the
+  same directory.
+- **At boot (dev-server):** `tmux/tmux.service`, a systemd user unit with linger on,
+  starts the server at boot so the layout is already back when you ssh in: run
+  `tmux a`, not `tmux` (plain `tmux` adds a new session). `ExecStop` saves once
+  more at shutdown. WSL skips the unit (it only boots when a terminal opens, and the
+  unit's env would lack the Windows PATH); there the first `tmux` restores.
+- **Install per machine:** `tmux/install-resurrect.sh` clones pinned plugins
+  (resurrect v4.0.0, continuum v3.1.0) into `~/.tmux/plugins`, links + enables the
+  unit where it applies, and reloads tmux. `.tmux.conf` skips the plugins if absent.
+- Gotchas: (1) the saved command is the full path (`~/.pixi/envs/nvim/bin/nvim`),
+  so the process list uses quoted `"~bin/nvim"` substring patterns (unquoted, the
+  plugin's `eval` tilde-expands `~bin` to `/bin`); (2) continuum's restore runs
+  *while the config loads*, before the unit's `_boot` session exists, so the unit
+  drops `_boot` in `ExecStartPost`, not in a resurrect hook; (3) continuum
+  auto-saves only when it is the sole tmux server on the machine.

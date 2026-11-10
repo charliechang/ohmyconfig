@@ -1,0 +1,23 @@
+# Start the tmux server at boot so the last saved layout is back before you
+# attach. tmux-continuum restores the last tmux-resurrect save whenever a fresh
+# server starts; ExecStop saves once more before shutdown (continuum also saves
+# every few minutes, which covers a hard power-off).
+# Installed by tmux/install-resurrect.sh into ~/.config/systemd/user/.
+# Needs `loginctl enable-linger` to start without a login.
+[Unit]
+Description=tmux server (restores the last tmux-resurrect save)
+
+[Service]
+Type=forking
+# ~/.local/bin first: on the dev-server that is the Sixel tmux 3.7b wrapper.
+Environment=PATH=%h/.local/bin:/usr/local/bin:/usr/bin:/bin
+WorkingDirectory=%h
+# continuum restores while the config loads, i.e. before this session exists;
+# afterwards drop it unless it is the only one (no save yet).
+ExecStart=/usr/bin/env tmux new-session -d -s _boot
+ExecStartPost=/bin/sh -c '[ "$(tmux ls | wc -l)" -gt 1 ] && tmux kill-session -t =_boot; true'
+ExecStop=%h/.tmux/plugins/tmux-resurrect/scripts/save.sh
+ExecStop=/usr/bin/env tmux kill-server
+
+[Install]
+WantedBy=default.target
