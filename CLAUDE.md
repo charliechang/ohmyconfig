@@ -219,17 +219,34 @@ tmux pane running Claude Code is tagged with a pane option `@agent_state`, drive
   every 5 min; `prefix C-s` saves now, `prefix C-r` restores by hand. Saves live in
   `~/.tmux/resurrect/`.
 - **Restore:** continuum restores the last save whenever a fresh tmux server starts.
-  nvim/vim (and resurrect's default list: less, man, top, ...) are relaunched with
-  their arguments; anything else, Claude Code included, comes back as a shell in the
-  same directory.
+  - **Programs** in `@resurrect-processes` (`.tmux.conf`) are rerun with their saved
+    command line in the pane's directory: nvim/vim, `jarvis_watch.py`, and resurrect's
+    defaults (less, man, top, ...). Add long-running programs there; other panes come
+    back as a shell in the same directory. (Not `:all:`: that would rerun every
+    foreground command, builds and one-off scripts included.)
+  - **Claude Code** panes run `claude --resume <id>` with their own conversation. The
+    agent-state hooks keep each pane's session ids in `@claude_sessions` (SessionStart
+    adds, SessionEnd removes); `tmux/resurrect-extras.sh` saves them to
+    `claude-panes.tsv` beside the resurrect save and resumes them (cd'ing to the
+    transcript's `cwd`).
+  - **nvim** reloads its own session (buffers, splits, tabs, cursor) and reopens
+    Claude via `:ClaudeCode --resume <id>` if it was running inside.
+    `nvim/lua/core/session.lua` keeps one session per tmux pane in
+    `~/.local/state/nvim/tmux-sessions/`, rewritten as you move around (a shutdown may
+    skip VimLeave); it only loads one when resurrect left a marker for that pane in
+    `~/.local/state/nvim/tmux-restore/`, so a normal `nvim` start is unaffected.
+    Terminals are left out of the session (they'd rerun their command).
 - **At boot (dev-server):** `tmux/tmux.service`, a systemd user unit with linger on,
   starts the server at boot so the layout is already back when you ssh in: run
   `tmux a`, not `tmux` (plain `tmux` adds a new session). `ExecStop` saves once
   more at shutdown. WSL skips the unit (it only boots when a terminal opens, and the
   unit's env would lack the Windows PATH); there the first `tmux` restores.
 - **Install per machine:** `tmux/install-resurrect.sh` clones pinned plugins
-  (resurrect v4.0.0, continuum v3.1.0) into `~/.tmux/plugins`, links + enables the
-  unit where it applies, and reloads tmux. `.tmux.conf` skips the plugins if absent.
+  (resurrect v4.0.0, continuum v3.1.0) into `~/.tmux/plugins`, links
+  `~/.local/bin/tmux-resurrect-extras`, links + enables the unit where it applies,
+  and reloads tmux. `.tmux.conf` skips the plugins if absent. Rerun
+  `tmux/install-agent-state.sh` too (adds the SessionStart hook). A Claude session
+  is known once any hook fires in it, so running ones are picked up as they work.
 - Gotchas: (1) the saved command is the full path (`~/.pixi/envs/nvim/bin/nvim`),
   so the process list uses quoted `"~bin/nvim"` substring patterns (unquoted, the
   plugin's `eval` tilde-expands `~bin` to `/bin`); (2) continuum's restore runs

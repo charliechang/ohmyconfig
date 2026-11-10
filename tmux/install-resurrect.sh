@@ -28,6 +28,9 @@ clone() { # name tag
 }
 clone tmux-resurrect v4.0.0
 clone tmux-continuum v3.1.0
+mkdir -p ~/.local/bin
+ln -sfn "$here/resurrect-extras.sh" ~/.local/bin/tmux-resurrect-extras
+echo "linked ~/.local/bin/tmux-resurrect-extras (Claude/nvim resume, see .tmux.conf)"
 
 if [ "$(ps -p 1 -o comm=)" = systemd ] && ! grep -qi microsoft /proc/version; then
   unit=~/.config/systemd/user/tmux.service
