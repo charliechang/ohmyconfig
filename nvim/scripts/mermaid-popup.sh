@@ -24,14 +24,28 @@ pele_dir="${PELE_DIR:-$HOME/.local/share/pele}"
 src="${1:?usage: mermaid-popup.sh <mermaid-source-file>}"
 cfg="${MERMAID_PUPPETEER_CONFIG:-$HOME/.config/mermaid/puppeteer.json}"
 scale="${MERMAID_PNG_SCALE:-3}"
-tmp="$(mktemp)"
-png="$(mktemp --suffix=.png)"
-trap 'rm -f "$png" "$tmp" "$src"' EXIT
+# One temp dir instead of `mktemp --suffix` (GNU-only; macOS mktemp lacks it).
+work="$(mktemp -d)"
+tmp="$work/out.txt"
+png="$work/out.png"
+svg="$work/out.svg"
+trap 'rm -rf "$work" "$src"' EXIT
+
+# Image protocol, picked from the terminal tmux's client is attached from:
+# Ghostty/kitty speak the kitty graphics protocol, not Sixel; everything else
+# (Windows Terminal on WSL) gets Sixel. Override with MERMAID_POPUP_FORMAT.
+fmt="${MERMAID_POPUP_FORMAT:-}"
+if [ -z "$fmt" ]; then
+  case "$(tmux display -p '#{client_termtype} #{client_termname}' 2>/dev/null)" in
+    *[Gg]hostty* | *kitty*) fmt=kitty ;;
+    *) fmt=sixels ;;
+  esac
+fi
 
 log() { printf '%s %s\n' "$(date '+%T')" "$*" >>"$LOG" 2>&1; }
 hold() { read -rsn1 _ </dev/tty 2>/dev/null || true; }
 
-log "===== start src=$src TERM=$TERM COLUMNS=${COLUMNS:-?} LINES=${LINES:-?}"
+log "===== start src=$src TERM=$TERM fmt=$fmt COLUMNS=${COLUMNS:-?} LINES=${LINES:-?}"
 log "node=$(command -v node || echo MISSING) pele=$([ -d "$pele_dir/node_modules/pele" ] && echo "$pele_dir" || echo MISSING) mmdc=$(command -v mmdc || echo MISSING) chafa=$(command -v chafa || echo MISSING)"
 
 clear
@@ -48,8 +62,6 @@ fail() {
 img=""
 pele_err=""
 if command -v node >/dev/null && [ -d "$pele_dir/node_modules/pele" ]; then
-  svg="$(mktemp --suffix=.svg)"
-  trap 'rm -f "$png" "$svg" "$tmp" "$src"' EXIT
   if PELE_DIR="$pele_dir" node "$here/pele-render.mjs" "$scale" <"$src" >"$svg" 2>"$tmp"; then
     log "pele ok svg_bytes=$(wc -c <"$svg")"
     img="$svg"
@@ -85,9 +97,19 @@ fi
 # and redraws the image. (chafa defaults to --passthrough tmux inside tmux, which
 # forwards raw Sixel to the outer terminal and bypasses tmux's grid, so tmux wipes
 # the image on the next redraw. With a Sixel-built tmux we want native handling.)
+#
+# kitty (Ghostty): tmux can't store kitty images, so they go to the outer
+# terminal via passthrough (needs `allow-passthrough on`) and must be deleted
+# on exit, or they stay drawn over the nvim window.
 clear
-chafa -f sixels --passthrough none --polite on "$img" 2>"$tmp"
+if [ "$fmt" = kitty ]; then
+  chafa -f kitty --passthrough tmux --polite on "$img" 2>"$tmp"
+else
+  chafa -f sixels --passthrough none --polite on "$img" 2>"$tmp"
+fi
 rc=$?
 log "chafa rc=$rc stderr=$(tr '\n' '|' <"$tmp")"
 [ "$rc" -ne 0 ] && { printf '  chafa failed:\n\n'; sed 's/^/    /' "$tmp" | tail -n 15; }
 hold
+# kitty delete-all-images (a=d,d=A), wrapped in tmux passthrough.
+[ "$fmt" = kitty ] && printf '\033Ptmux;\033\033_Ga=d,d=A\033\033\\\033\\'

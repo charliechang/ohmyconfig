@@ -111,8 +111,10 @@ popup** (`<leader>mm`).
   ```
   (`CGO_ENABLED=0` avoids the pixi Go toolchain's missing C compiler on this box.)
   On the Mac (no Go) use the prebuilt release binary — see the *New machine checklist*.
-  The Mac's Ghostty terminal has no Sixel, so `<leader>mm` doesn't work there — use
-  inline or `:MermaidRender`.
+  The Mac's Ghostty terminal has no Sixel; `mermaid-popup.sh` detects it (tmux
+  `client_termtype`) and uses chafa's **kitty** graphics via tmux passthrough instead,
+  deleting the image on exit. Everything else (WSL / Windows Terminal) stays on Sixel.
+  Force one with `MERMAID_POPUP_FORMAT=kitty|sixels`.
 - **Image popup**: `chafa` with the SVG loader (`chafa --version` lists `SVG`), Node ≥ 20 +
   **pele** in `~/.local/share/pele` (`npm install pele@1` there; override with `PELE_DIR`),
   and a Sixel tmux + terminal. Optional fallback: `mmdc` (`@mermaid-js/mermaid-cli`).
