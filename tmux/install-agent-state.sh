@@ -31,6 +31,7 @@ WANT = [
     ("Notification", "permission_prompt|elicitation_dialog", "blocked"),
     ("Stop", None, "done"),
     ("SessionEnd", None, "clear"),
+    ("SessionStart", None, "session"),
 ]
 
 hooks = cfg.setdefault("hooks", {})

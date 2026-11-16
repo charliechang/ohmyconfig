@@ -35,6 +35,13 @@ The guards above mean a missing tool fails **silently**, so install these up fro
      && tar -xzf /tmp/ma/mermaid-ascii_Darwin_arm64.tar.gz -C /tmp/ma \
      && install -m 755 /tmp/ma/mermaid-ascii ~/.local/bin/ && rm -rf /tmp/ma
    ```
+2b. **`tmux/install-resurrect.sh`** — tmux sessions survive reboots (see *Feature:
+   tmux survives reboots*). github.com blocked? Prefix `ALL_PROXY=socks5h://localhost:1080`.
+2c. **`tmux/install-catppuccin.sh`** — Catppuccin mocha theme (pinned `v2.3.2`, manual
+   install under `~/.config/tmux/plugins/catppuccin`). Without it the plain green bar stays.
+   Needs a Nerd Font in the terminal for the rounded caps and icons. Its block in
+   `.tmux.conf` must stay **above** the resurrect block: continuum appends its save hook
+   to `status-right` as it is when continuum loads.
 3. **Neovim:** `:Lazy sync`, then **restart** nvim (lsp/mason/mermaid config only runs at
    startup). The first start makes Mason download the LSP servers.
 4. Optional, per machine: `tree-sitter` CLI (only to build parsers; Neovim's bundled
@@ -210,3 +217,44 @@ tmux pane running Claude Code is tagged with a pane option `@agent_state`, drive
 - **Install per machine:** `tmux/install-agent-state.sh` — symlinks the script to
   `~/.local/bin/tmux-agent-state`, merges the hooks into `~/.claude/settings.json`
   (idempotent, keeps other hooks, writes `settings.json.bak`), and reloads tmux.
+
+## Feature: tmux survives reboots (tmux-resurrect + tmux-continuum)
+
+- **Save:** tmux-continuum saves every session/window/split/cwd (plus pane text)
+  every 5 min; `prefix C-s` saves now, `prefix C-r` restores by hand. Saves live in
+  `~/.tmux/resurrect/`.
+- **Restore:** continuum restores the last save whenever a fresh tmux server starts.
+  - **Programs** in `@resurrect-processes` (`.tmux.conf`) are rerun with their saved
+    command line in the pane's directory: nvim/vim, `jarvis_watch.py`, and resurrect's
+    defaults (less, man, top, ...). Add long-running programs there; other panes come
+    back as a shell in the same directory. (Not `:all:`: that would rerun every
+    foreground command, builds and one-off scripts included.)
+  - **Claude Code** panes run `claude --resume <id>` with their own conversation. The
+    agent-state hooks keep each pane's session ids in `@claude_sessions` (SessionStart
+    adds, SessionEnd removes); `tmux/resurrect-extras.sh` saves them to
+    `claude-panes.tsv` beside the resurrect save and resumes them (cd'ing to the
+    transcript's `cwd`).
+  - **nvim** reloads its own session (buffers, splits, tabs, cursor) and reopens
+    Claude via `:ClaudeCode --resume <id>` if it was running inside.
+    `nvim/lua/core/session.lua` keeps one session per tmux pane in
+    `~/.local/state/nvim/tmux-sessions/`, rewritten as you move around (a shutdown may
+    skip VimLeave); it only loads one when resurrect left a marker for that pane in
+    `~/.local/state/nvim/tmux-restore/`, so a normal `nvim` start is unaffected.
+    Terminals are left out of the session (they'd rerun their command).
+- **At boot (dev-server):** `tmux/tmux.service`, a systemd user unit with linger on,
+  starts the server at boot so the layout is already back when you ssh in: run
+  `tmux a`, not `tmux` (plain `tmux` adds a new session). `ExecStop` saves once
+  more at shutdown. WSL skips the unit (it only boots when a terminal opens, and the
+  unit's env would lack the Windows PATH); there the first `tmux` restores.
+- **Install per machine:** `tmux/install-resurrect.sh` clones pinned plugins
+  (resurrect v4.0.0, continuum v3.1.0) into `~/.tmux/plugins`, links
+  `~/.local/bin/tmux-resurrect-extras`, links + enables the unit where it applies,
+  and reloads tmux. `.tmux.conf` skips the plugins if absent. Rerun
+  `tmux/install-agent-state.sh` too (adds the SessionStart hook). A Claude session
+  is known once any hook fires in it, so running ones are picked up as they work.
+- Gotchas: (1) the saved command is the full path (`~/.pixi/envs/nvim/bin/nvim`),
+  so the process list uses quoted `"~bin/nvim"` substring patterns (unquoted, the
+  plugin's `eval` tilde-expands `~bin` to `/bin`); (2) continuum's restore runs
+  *while the config loads*, before the unit's `_boot` session exists, so the unit
+  drops `_boot` in `ExecStartPost`, not in a resurrect hook; (3) continuum
+  auto-saves only when it is the sole tmux server on the machine.

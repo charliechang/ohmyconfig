@@ -10,9 +10,14 @@
 #
 # Usage:
 #   agent-state.sh set <state>|clear   from Claude Code hooks (uses $TMUX_PANE)
+#   agent-state.sh set session         SessionStart: only record the session id
 #   agent-state.sh seen <pane>         from tmux hooks: done -> idle
 #   agent-state.sh summary             status-right counts
 #   agent-state.sh next <client>       jump to next blocked, else done, pane
+#
+# Every hook also records the Claude session id in the pane option
+# @claude_sessions (space-separated, newest last; SessionEnd removes it), so
+# tmux/resurrect-extras.sh can `claude --resume` it after a reboot.
 
 TMUX_BIN=${TMUX_BIN:-tmux}
 
@@ -27,11 +32,34 @@ visible() {
     '#{&&:#{pane_active},#{&&:#{window_active},#{session_attached}}}' 2>/dev/null)" = 1 ]
 }
 
+# Keep @claude_sessions on $pane current: drop the id on clear, otherwise make
+# it the newest entry.
+track_session() { # state id
+  local state=$1 id=$2 ids new
+  [ -n "$id" ] || return 0
+  ids=$("$TMUX_BIN" show -pqv -t "$pane" @claude_sessions 2>/dev/null)
+  [ "$state" != clear ] && [ "${ids##* }" = "$id" ] && return 0
+  new=" $ids "
+  new=${new// $id / }
+  [ "$state" = clear ] || new="$new $id"
+  new=$(echo $new)
+  if [ -n "$new" ]; then
+    "$TMUX_BIN" set -p -t "$pane" @claude_sessions "$new" 2>/dev/null
+  else
+    "$TMUX_BIN" set -pu -t "$pane" @claude_sessions 2>/dev/null
+  fi
+}
+
 cmd_set() {
   local state=$1 pane=$TMUX_PANE prev
   [ -n "$pane" ] || exit 0
-  # Claude Code pipes the hook payload on stdin; drain it so the hook never blocks.
-  [ -t 0 ] || cat >/dev/null
+  # Claude Code pipes the hook payload on stdin (read it all so the hook never
+  # blocks); it carries the session id.
+  local payload=""
+  [ -t 0 ] || payload=$(cat)
+  track_session "$state" "$(printf '%s' "$payload" |
+    sed -n 's/.*"session_id" *: *"\([^"]*\)".*/\1/p' | head -1)"
+  [ "$state" = session ] && exit 0
   prev=$("$TMUX_BIN" show -pqv -t "$pane" @agent_state 2>/dev/null)
   if [ "$state" = clear ]; then
     "$TMUX_BIN" set -pu -t "$pane" @agent_state 2>/dev/null
