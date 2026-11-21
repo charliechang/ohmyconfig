@@ -37,7 +37,12 @@ cmd_save() {
   # session<TAB>window<TAB>pane<TAB>command<TAB>ids (space-separated, newest last)
   "$TMUX_BIN" list-panes -a -F \
     '#{session_name}	#{window_index}	#{pane_index}	#{pane_current_command}	#{@claude_sessions}' |
-    awk -F'\t' '$5 != ""' >"$tsv.tmp" && mv "$tsv.tmp" "$tsv"
+    # Native Claude runs as ~/.local/share/claude/versions/<version>, and macOS
+    # reports that file name (e.g. 2.1.321) as pane_current_command.
+    awk -F'\t' -v OFS='\t' '$5 != "" {
+      if ($4 ~ /^[0-9]+\.[0-9]+\.[0-9]+$/) $4 = "claude"
+      print
+    }' >"$tsv.tmp" && mv "$tsv.tmp" "$tsv"
 }
 
 cmd_markers() {

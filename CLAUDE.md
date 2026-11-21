@@ -257,4 +257,7 @@ tmux pane running Claude Code is tagged with a pane option `@agent_state`, drive
   plugin's `eval` tilde-expands `~bin` to `/bin`); (2) continuum's restore runs
   *while the config loads*, before the unit's `_boot` session exists, so the unit
   drops `_boot` in `ExecStartPost`, not in a resurrect hook; (3) continuum
-  auto-saves only when it is the sole tmux server on the machine.
+  auto-saves only when it is the sole tmux server on the machine; (4) on macOS a pane
+  running native Claude reports `pane_current_command` as its version file name
+  (`2.1.321`, the target of `~/.local/bin/claude`), so `resurrect-extras.sh save` maps
+  version-shaped names to `claude`.
