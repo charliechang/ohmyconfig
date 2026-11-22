@@ -114,7 +114,12 @@ cmd_move() {
   if is_proxy "$ctty"; then
     sess=$(t display -p -c "$ctty" '#{session_id}')
     n=$(($(t show -gqv @navseq 2>/dev/null || echo 0) + 1))
-    t set -g @navseq "$n" \; set -t "$sess" @navmsg "@@nav:$dir:$n@@" \; refresh-client -S -t "$ctty"
+    # Titles carry the marker; switch them on here too, in case this client
+    # came in some other way than remote-attach.sh (e.g. a stale @navproxy
+    # flag on a reused tty).
+    t set -g @navseq "$n" \; set -t "$sess" set-titles on \; \
+      set -t "$sess" set-titles-string '#{@navmsg}#h: #S:#W' \; \
+      set -t "$sess" @navmsg "@@nav:$dir:$n@@" \; refresh-client -S -t "$ctty"
     note "move $dir: title marker $n to proxy client $ctty"
     # Drop the marker once sent; the proxy also ignores repeats of <n>.
     (sleep 1; t set -u -t "$sess" @navmsg \; refresh-client -S -t "$ctty") >/dev/null 2>&1 &

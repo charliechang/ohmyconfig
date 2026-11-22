@@ -71,7 +71,10 @@ driver instead of Ghostty), over the real VPN connection to 10.0.0.4:
 | `prefix d` (detach) ends remote.sh, no reconnect | ✅ |
 | attaches to the existing session as a grouped copy (`work` → `work-1`) | ✅ |
 | **Real Ghostty, local splits** (Step A): AppleScript `goto_split`, focus-in entry from real splits | ✅ 13 moves each followed by the right-side `enter`; 3 `-> false` at the outer edge (correct); no permission prompt problems |
-| **Real Ghostty + 10.0.0.4** (Step B): `split-remote.sh`, crossing into / out of the remote, sleep + reconnect | ⏳ |
+| **Real Ghostty + 10.0.0.4** (Step B): `split-remote.sh host 0`, `C-l` into / `C-h` out of the remote, side by side | ✅ (after reopening the split, lesson 10) |
+| Step B stacked splits (`split-remote.sh host 0 down`, `C-j` / `C-k` across local ↔ remote) | ✅ |
+| Step B several remote splits at once (own grouped session each: `0-3`, `0-4`, …) | ✅ |
+| Step B sleep / lid close + reconnect | ⏳ |
 
 Measured: ping to 10.0.0.4 ≈ 435 ms avg (VPN, `utun4`). Entry key → remote redraw
 visible ≈ 0.41 s (≈ 1 round trip, like a keystroke echo).
@@ -114,7 +117,15 @@ visible ≈ 0.41 s (≈ 1 round trip, like a keystroke echo).
    the driver doesn't kill remote.sh/proxy/ssh children; `pgrep -f 'ssh -t'` also matches
    the proxy (its argv contains the ssh command) — match `'^ssh -t'`. Opening a new ssh
    connection to 10.0.0.4 takes ~5 s; use ControlMaster for test commands.
-10. **Windows terminal choice**: Ghostty has no official Windows build (only community
+10. **Step B, first try (2026-11-22)**: a split opened *before* 10.0.0.4 pulled fell back
+    to `tmux new -A -s main` (no titles); a later split on the same remote tty set
+    `@navproxy_dev_ttys000`. Back in the old split, remote `C-h` sent markers (log:
+    `title marker 27..32`) but `set-titles` was off in `main`, so nothing reached the Mac.
+    Fix: nav.sh now switches titles on for the session whenever it signals a proxy
+    client. Also: after the remote tmux server restarted (resurrect), all sessions looked
+    equally recent and `remote-attach.sh` picked the stray `main` over `0` — pass the
+    session explicitly (`split-remote.sh host 0`) until the choice is smarter.
+11. **Windows terminal choice**: Ghostty has no official Windows build (only community
     forks). WezTerm runs from its portable zip without admin and has
     `wezterm cli activate-pane-direction` — an option if Windows Terminal's `wt.exe`
     focus moves feel too slow. Windows Terminal itself needs nothing installed.

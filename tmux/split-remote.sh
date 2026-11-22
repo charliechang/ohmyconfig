@@ -16,7 +16,7 @@ dir=${3:-right}
 cmd="$here/remote.sh $(printf '%q' "$host")${session:+ $(printf '%q' "$session")}"
 
 if [ "$(uname)" = Darwin ]; then
-  osascript - "$cmd" "$dir" <<'EOF'
+  osascript - "$cmd" "$dir" >/dev/null <<'EOF'
 on run argv
   tell application "Ghostty"
     set cfg to new surface configuration
