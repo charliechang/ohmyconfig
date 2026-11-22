@@ -1,0 +1,9 @@
+{
+  "//": "Fallback split navigation for Windows Terminal, same keys as Ghostty (terminal/ghostty-nav.conf). C-h/j/k/l already crosses panes via tmux/nav.sh; these work even when that path can't. Copy the entries into the \"actions\" array of WT's settings.json (Settings > Open JSON file); WT has no include. Design + progress: docs/terminal-split-nav.md",
+  "actions": [
+    { "keys": "ctrl+alt+h", "command": { "action": "moveFocus", "direction": "left" } },
+    { "keys": "ctrl+alt+j", "command": { "action": "moveFocus", "direction": "down" } },
+    { "keys": "ctrl+alt+k", "command": { "action": "moveFocus", "direction": "up" } },
+    { "keys": "ctrl+alt+l", "command": { "action": "moveFocus", "direction": "right" } }
+  ]
+}

@@ -218,6 +218,25 @@ tmux pane running Claude Code is tagged with a pane option `@agent_state`, drive
   `~/.local/bin/tmux-agent-state`, merges the hooks into `~/.claude/settings.json`
   (idempotent, keeps other hooks, writes `settings.json.bak`), and reloads tmux.
 
+## Feature: C-h/j/k/l across terminal splits, local and remote tmux
+
+A big monitor split by the terminal app (Ghostty on the Mac, Windows Terminal on WSL),
+local tmux in one split and remote tmux in others (`tmux/remote.sh <host>`, or
+`tmux/split-remote.sh <host>` to open the split). `C-h/j/k/l` moves through nvim
+windows, tmux panes and terminal splits alike, entering each from the side you came
+from; `remote.sh` reconnects after a dropped connection and attaches to your existing
+remote session as a grouped session.
+
+- Pieces: `nvim/lua/core/nav.lua` (replaced nvim-tmux-navigation), `tmux/nav.sh`,
+  `tmux/nav-proxy.py` (pty proxy carrying the signals in-band), `tmux/remote.sh`,
+  `tmux/remote-attach.sh` (runs on the remote, from its own checkout), the C-h/j/k/l,
+  `client-focus-in` and `user-keys` block in `.tmux.conf`, fallback `ctrl+alt+h/j/k/l`
+  terminal bindings in `terminal/`.
+- **Design, test status per machine pair, lessons, WSL checklist:
+  [`docs/terminal-split-nav.md`](docs/terminal-split-nav.md)** — update it as you test.
+- Every machine involved needs this repo pulled, `tmux source ~/.tmux.conf`, and nvim
+  restarted. Debug log: `$TMPDIR/tmux-nav-<uid>/log`.
+
 ## Feature: tmux survives reboots (tmux-resurrect + tmux-continuum)
 
 - **Save:** tmux-continuum saves every session/window/split/cwd (plus pane text)

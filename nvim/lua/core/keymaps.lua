@@ -18,11 +18,8 @@ keymap.set("n", "b9", ":b9<CR>")
 
 keymap.set("n", "<C-S>", ":w!<CR>")
 
--- Terminal mode navigation - escape terminal and move to window
-keymap.set("t", "<C-h>", "<C-\\><C-n><C-w>h", { desc = "Exit terminal and move left" })
-keymap.set("t", "<C-j>", "<C-\\><C-n><C-w>j", { desc = "Exit terminal and move down" })  
-keymap.set("t", "<C-k>", "<C-\\><C-n><C-w>k", { desc = "Exit terminal and move up" })
-keymap.set("t", "<C-l>", "<C-\\><C-n><C-w>l", { desc = "Exit terminal and move right" })
+-- C-h/j/k/l (normal, visual and terminal mode) live in core/nav.lua: they move
+-- between windows and continue into tmux panes / terminal splits at the edge.
 
 -- GitHub Copilot
 keymap.set("n", "<leader>ce", ":Copilot enable<CR>", { desc = "Enable Copilot" })
