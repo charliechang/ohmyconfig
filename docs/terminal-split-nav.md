@@ -96,7 +96,7 @@ alias needed). Driven from WSL with `nav.sh` calls in a real Windows Terminal wi
 | 6 | remote edge (`nav.sh move R` at the dev-server's right edge) | ✅ `title marker 1` → WSL `proxy edge marker 1: move R` → `term-move R wt -> sent`, < 1 s |
 | 7 | connection dropped (local ssh SIGTERM) | ✅ reconnected as `0-3`; the old grouped session lingers until the dev-server's sshd drops the dead client (`ClientAliveInterval 120`, up to ~6 min) — harmless. Real sleep/lid close: ⏳ |
 | 8 | tmux server unit | ✅ `tmux.service` (use `ps -o uunit=`: `unit=` shows the system-level `user@….service`) |
-| 3, 9 | real `C-h/j/k/l` keypresses, incl. nvim and repeated entries on 3.7b | ⏳ needs a person at the keyboard (and nvim restarted for `core.nav`) |
+| 3, 9 | real `C-h/j/k/l` keypresses, incl. nvim and repeated entries on 3.7b | ✅ `C-l` local → dev-server and `C-h` back out of a dev-server nvim, repeatedly (2026-11-23, by hand). Only after that nvim was restarted: see lesson 13 |
 
 ## Lessons learned
 
@@ -154,6 +154,12 @@ alias needed). Driven from WSL with `nav.sh` calls in a real Windows Terminal wi
     `remote.sh` now adds `-o ClearAllForwardings=yes` when one of the host's forward ports
     is already listening (and keeps the forward when nothing holds it). (c) `wt.exe` splits
     its arguments on `;` — keep it out of commands passed through `split-remote.sh`.
+
+13. **An nvim started before the pull swallows `C-h/j/k/l`**: tmux hands the key to any
+    nvim in the pane, and an old nvim still runs the removed nvim-tmux-navigation, which
+    only does `select-pane` (nothing at the edge). Symptom: entering works, leaving
+    doesn't, and the remote log shows no `move` lines. Check: `@nvim_sock` is empty on the
+    pane (core.nav sets it). Fix: restart that nvim.
 
 ## Try it on the Mac (Ghostty)
 
