@@ -48,6 +48,8 @@ The guards above mean a missing tool fails **silently**, so install these up fro
    markdown parsers are used without it), Java 21 for `jdtls`,
    and pele (`~/.local/share/pele`) + `chafa` + a Sixel terminal for `<leader>mm`
    (`mmdc` only as a fallback).
+5. **WSL only:** `terminal/install-windows-terminal.sh` — Windows Terminal **dev-server**
+   profile (dev-server tmux via `tmux/remote.sh momo-dev 0`) + `ctrl+alt+h/j/k/l` keys.
 
 ## IMPORTANT: two checkouts exist on the dev-server
 
@@ -236,6 +238,11 @@ remote session as a grouped session.
   [`docs/terminal-split-nav.md`](docs/terminal-split-nav.md)** — update it as you test.
 - Every machine involved needs this repo pulled, `tmux source ~/.tmux.conf`, and nvim
   restarted. Debug log: `$TMPDIR/tmux-nav-<uid>/log`.
+- **WSL → dev-server:** `tmux/split-remote.sh momo-dev 0 [right|down|tab|window]`
+  (`window` = a new Windows Terminal window), or the WT **dev-server** profile from
+  `terminal/install-windows-terminal.sh`. Always pass the session (`0`, the one resurrect
+  restores). Remote `tmux` must be the 3.7b one (`~/.local/bin`): a non-login ssh command
+  gets apt's 3.4 client, which can't talk to the server.
 
 ## Feature: tmux survives reboots (tmux-resurrect + tmux-continuum)
 

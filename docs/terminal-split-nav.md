@@ -34,8 +34,9 @@ kitty), clipboard and `C-b` behave exactly as before.
 | `tmux/remote.sh <host> [session]` | Runs `ssh -t` inside `nav-proxy.py`; reconnects when ssh exits 255 (connection lost), stops on detach. Sets `TERM=xterm-256color` for Ghostty. |
 | `tmux/nav-proxy.py` | Pty proxy in the byte stream. Terminal→remote: on focus-in (`ESC[I`) with a fresh pending move, inserts the entry key **before** the focus-in. Remote→terminal: strips the title marker and runs `nav.sh term-move`. Everything else passes through. |
 | `tmux/remote-attach.sh` | Remote end: tmux server outside the ssh login (tmux.service / `systemd-run --scope` on Linux), picks the most recently attached session, attaches as a **grouped** session (`destroy-unattached`, `set-titles` for the marker), marks the client tty `@navproxy<tty>`. |
-| `tmux/split-remote.sh <host> [session] [right\|down]` | Opens a terminal split running `remote.sh` (Ghostty AppleScript `split`, WT `split-pane`). |
+| `tmux/split-remote.sh <host> [session] [right\|down\|tab\|window]` | Opens a terminal split running `remote.sh` (Ghostty AppleScript `split`, WT `split-pane`); `tab`/`window`: a new WT tab/window (WSL only). |
 | `terminal/ghostty-nav.conf`, `terminal/windows-terminal-nav.json` | Fallback `ctrl+alt+h/j/k/l` split navigation, same on both. |
+| `terminal/install-windows-terminal.sh [host] [session]` | WSL: merges those WT keys into WT's `settings.json` and adds a **dev-server** profile running `remote.sh momo-dev 0` (fixed GUID, keeps `settings.json.bak`). |
 
 Flows (dir = direction of travel):
 
@@ -79,9 +80,23 @@ driver instead of Ghostty), over the real VPN connection to 10.0.0.4:
 Measured: ping to 10.0.0.4 ≈ 435 ms avg (VPN, `utun4`). Entry key → remote redraw
 visible ≈ 0.41 s (≈ 1 round trip, like a keystroke echo).
 
-### WSL + dev-server
+### WSL + dev-server (2026-11-23)
 
-⏳ Not started. Follow *WSL + dev-server checklist* below and fill in results here.
+Both on `c2b0c69` + this change; tmux 3.7b (Sixel build) on both, configs reloaded.
+WSL reaches the dev-server through its existing IAP alias **`momo-dev`** (no new `dev`
+alias needed). Driven from WSL with `nav.sh` calls in a real Windows Terminal window
+(remote split left, local split right), not real keypresses yet:
+
+| # | Check | Result |
+|---|---|---|
+| 1 | `tmux -V` | ✅ 3.7b on both (user-keys, client-focus-in OK) |
+| 2 | `split-remote.sh momo-dev 0 window` | ✅ new WT window, grouped session `0-2`, `@navproxy_dev_pts_12` set |
+| 4 | `nav.sh term-move L wt` | ✅ `wt.exe` runs **directly** from WSL (`-> sent`, no `cmd.exe` fallback), ≈ 190 ms per move |
+| 5 | entering the remote split | ✅ WT sends focus events: `proxy focus-in, entered moving L` → dev-server `enter … moving L -> %0` |
+| 6 | remote edge (`nav.sh move R` at the dev-server's right edge) | ✅ `title marker 1` → WSL `proxy edge marker 1: move R` → `term-move R wt -> sent`, < 1 s |
+| 7 | connection dropped (local ssh SIGTERM) | ✅ reconnected as `0-3`; the old grouped session lingers until the dev-server's sshd drops the dead client (`ClientAliveInterval 120`, up to ~6 min) — harmless. Real sleep/lid close: ⏳ |
+| 8 | tmux server unit | ✅ `tmux.service` (use `ps -o uunit=`: `unit=` shows the system-level `user@….service`) |
+| 3, 9 | real `C-h/j/k/l` keypresses, incl. nvim and repeated entries on 3.7b | ⏳ needs a person at the keyboard (and nvim restarted for `core.nav`) |
 
 ## Lessons learned
 
@@ -130,6 +145,16 @@ visible ≈ 0.41 s (≈ 1 round trip, like a keystroke echo).
     `wezterm cli activate-pane-direction` — an option if Windows Terminal's `wt.exe`
     focus moves feel too slow. Windows Terminal itself needs nothing installed.
 
+12. **WSL + dev-server (2026-11-23)**: (a) a non-login `ssh host cmd` on the dev-server
+    has no `~/.local/bin` on PATH, so a bare `tmux` there is apt's 3.4 client, which can't
+    talk to the 3.7b server ("server exited unexpectedly"). `remote-attach.sh` sets PATH
+    and `tmux.service` sets it for `run-shell`, so real use is fine — but prefix PATH when
+    calling `nav.sh` over ssh in tests. (b) WSL's `momo-dev` has `DynamicForward 1080`
+    (git → github/gitlab); a second connection used to warn "Address already in use", so
+    `remote.sh` now adds `-o ClearAllForwardings=yes` when one of the host's forward ports
+    is already listening (and keeps the forward when nothing holds it). (c) `wt.exe` splits
+    its arguments on `;` — keep it out of commands passed through `split-remote.sh`.
+
 ## Try it on the Mac (Ghostty)
 
 1. `tmux source ~/.tmux.conf` in the local tmux (or restart it); restart nvim (new
@@ -148,7 +173,10 @@ visible ≈ 0.41 s (≈ 1 round trip, like a keystroke echo).
 ## WSL + dev-server checklist
 
 Before: `git pull` on WSL and on the dev-server; `tmux source ~/.tmux.conf` in both
-tmux servers; restart nvim on both (`:Lazy clean`).
+tmux servers; restart nvim on both (`:Lazy clean`); on WSL run
+`terminal/install-windows-terminal.sh` (adds the **dev-server** WT profile = `remote.sh
+momo-dev 0`, and the `ctrl+alt+h/j/k/l` fallback keys). From a shell:
+`tmux/split-remote.sh momo-dev 0 [right|down|tab|window]`.
 
 **WSL reaches the dev-server through Google IAP.** `remote.sh` runs plain
 `ssh -t <host> …`, so give the dev-server an ssh alias whose `ProxyCommand` opens the IAP
@@ -181,12 +209,11 @@ where remote.sh passes ssh's.) If WSL already has such an alias, use it. What IA
 | 5 | Entering the dev-server split | lands on its left pane / nvim window | needs WT to send focus events (`ESC[I`) — log: `proxy focus-in, entered moving R` |
 | 6 | `C-h` at the dev-server's left edge | WT focus moves left, lands on the local right pane | log: `proxy edge marker n: move L` then `term-move L wt` |
 | 7 | Lid close / sleep, wake | "reconnecting", same session, work still running | through IAP: how long until back? needed `gcloud auth login`? |
-| 8 | `ps -o unit= -p $(tmux display -p '#{pid}')` on the dev-server | `tmux.service`, not `session-N.scope` | |
+| 8 | `ps -o uunit= -p $(tmux display -p '#{pid}')` on the dev-server | `tmux.service`, not `session-N.scope` | |
 | 9 | Key-order lesson (3) on tmux 3.4 / 3.7b | entry works repeatedly | |
 
-Unknowns going in: whether `wt.exe` runs directly from WSL (Microsoft says aliases may
-not; script falls back to `cmd.exe /c`), how slow a WT focus move is, whether WT reports
-focus in/out to the app.
+Unknowns going in (answered 2026-11-23): `wt.exe` runs directly from WSL; a WT focus
+move takes ≈ 190 ms; WT reports focus in/out to the app.
 
 ## Open items / ideas
 

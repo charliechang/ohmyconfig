@@ -32,11 +32,23 @@ attach=${REMOTE_ATTACH:-\$HOME/work/ohmyconfig/tmux/remote-attach.sh}
 remote_cmd="a=$attach; if [ -x \"\$a\" ]; then exec \"\$a\" proxy '$session'; fi; "
 remote_cmd+="PATH=\$HOME/.local/bin:/opt/homebrew/bin:/usr/local/bin:\$PATH; exec tmux new -A -s main"
 
+# A host alias with forwards (WSL's momo-dev: DynamicForward 1080 for git) would
+# warn "Address already in use" when another connection already holds the port,
+# so this one drops its forwards then. If nothing holds them, it keeps them.
+forwards() {
+  local p
+  for p in $(ssh -G "$host" 2>/dev/null |
+    awk '$1 == "dynamicforward" || $1 == "localforward" { print $2 }' | sed 's/.*://'); do
+    (exec 3<>"/dev/tcp/127.0.0.1/$p") 2>/dev/null && { echo -o ClearAllForwardings=yes; return; }
+  done
+}
+
 wait=3
 while :; do
   start=$(date +%s)
+  # shellcheck disable=SC2046 # forwards prints whole words
   python3 "$here/nav-proxy.py" "$here/nav.sh" "$kind" -- \
-    ssh -t -o ServerAliveInterval=15 -o ServerAliveCountMax=3 "$host" "$remote_cmd"
+    ssh -t -o ServerAliveInterval=15 -o ServerAliveCountMax=3 $(forwards) "$host" "$remote_cmd"
   rc=$?
   # 255 = ssh itself failed (connection lost / refused). Anything else means
   # the remote tmux client ended normally (detached): stop.

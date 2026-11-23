@@ -3,19 +3,22 @@
 # <host> (a remote tmux you can reach with C-h/j/k/l). Run it from the split
 # you want to split, e.g. `split-remote.sh charlie.chang@10.0.0.4`.
 #   macOS: Ghostty (AppleScript `split ... with configuration`)
-#   WSL:   Windows Terminal (`wt.exe -w 0 split-pane`)
+#   WSL:   Windows Terminal (`wt.exe -w 0 split-pane`); `tab` / `window` open
+#          it in a new WT tab / window instead (WSL only), e.g.
+#          `split-remote.sh momo-dev 0 window`
 # Design + progress: docs/terminal-split-nav.md
 #
-# usage: split-remote.sh <ssh-host> [session] [right|down]
+# usage: split-remote.sh <ssh-host> [session] [right|down|tab|window]
 set -eu
 
 here=$(cd "$(dirname "$(readlink -f "$0")")" && pwd)
-host=${1:?usage: split-remote.sh <ssh-host> [session] [right|down]}
+host=${1:?usage: split-remote.sh <ssh-host> [session] [right|down|tab|window]}
 session=${2:-}
 dir=${3:-right}
 cmd="$here/remote.sh $(printf '%q' "$host")${session:+ $(printf '%q' "$session")}"
 
 if [ "$(uname)" = Darwin ]; then
+  case $dir in tab | window) echo "split-remote.sh: tab/window are Windows Terminal only" >&2; exit 1 ;; esac
   osascript - "$cmd" "$dir" >/dev/null <<'EOF'
 on run argv
   tell application "Ghostty"
@@ -31,9 +34,14 @@ on run argv
 end run
 EOF
 elif [ -d /mnt/c/Windows ]; then
-  flag=-V
-  [ "$dir" = down ] && flag=-H
-  args=(-w 0 split-pane "$flag" wsl.exe -d "${WSL_DISTRO_NAME:-Ubuntu}" --cd "$HOME" -e bash -lc "$cmd")
+  # wt.exe splits its own arguments on `;`: keep it out of $cmd.
+  run=(wsl.exe -d "${WSL_DISTRO_NAME:-Ubuntu}" --cd "$HOME" -e bash -lc "$cmd")
+  case $dir in
+    down) args=(-w 0 split-pane -H "${run[@]}") ;;
+    tab) args=(-w 0 new-tab --title "$host" "${run[@]}") ;;
+    window) args=(-w new new-tab --title "$host" "${run[@]}") ;;
+    *) args=(-w 0 split-pane -V "${run[@]}") ;;
+  esac
   (cd /mnt/c && { wt.exe "${args[@]}" 2>/dev/null || cmd.exe /c wt.exe "${args[@]}"; })
 else
   echo "split-remote.sh: only Ghostty (macOS) and Windows Terminal (WSL) are supported" >&2
